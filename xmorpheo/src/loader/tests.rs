@@ -138,9 +138,9 @@ fn replace_says_where_the_new_program_stays_when_renaming_fails() {
     let mut p = with_old();
     p.fail_rename = true;
     let err = install(&mut p, &pin_path(7), true).unwrap_err();
-    assert_eq!(programs(&p), [("7.new", "new")]);
+    assert_eq!(programs(&p), [("7_new", "new")]);
     let msg = err.to_string();
-    assert!(msg.contains("/sys/fs/bpf/xmorpheo/7.new"), "{msg}");
+    assert!(msg.contains("/sys/fs/bpf/xmorpheo/7_new"), "{msg}");
 
     // The next run under the lock moves it into place.
     p.fail_rename = false;
@@ -151,7 +151,16 @@ fn replace_says_where_the_new_program_stays_when_renaming_fails() {
 #[test]
 fn recover_drops_a_temporary_pin_next_to_a_program() {
     let mut p = with_old();
-    p.pinned.insert(pin_path(7).with_extension("new"), "new");
+    p.pinned.insert(new_path(&pin_path(7)), "new");
     recover(&mut p, &pin_path(7)).unwrap();
     assert_eq!(programs(&p), [("7", "old")]);
+}
+
+#[test]
+fn temporary_pin_has_no_dot() {
+    // The BPF filesystem refuses names with dots.
+    assert_eq!(
+        new_path(&pin_path(7)),
+        Path::new("/sys/fs/bpf/xmorpheo/7_new")
+    );
 }

@@ -421,12 +421,12 @@ pub fn detach(selectors: &[String], all: bool) -> Result<(), Box<dyn Error>> {
     let ids: Vec<u32> = if all {
         match std::fs::read_dir(loader::PIN_DIR) {
             Ok(entries) => {
-                // A temporary pin "<hid_id>.new" of an interrupted replace
+                // A temporary pin "<hid_id>_new" of an interrupted replace
                 // belongs to its device too.
                 let mut ids: Vec<u32> = entries
                     .filter_map(|e| {
                         let name = e.ok()?.file_name().into_string().ok()?;
-                        name.trim_end_matches(".new").parse().ok()
+                        name.trim_end_matches("_new").parse().ok()
                     })
                     .collect();
                 ids.sort_unstable();

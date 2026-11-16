@@ -137,7 +137,7 @@ same line to the journal, see
 `journalctl -t xmorpheo`, and more only on errors.
 
 `--replace` reads the configuration, plans the device, loads and attaches
-the new program, and pins it at `/sys/fs/bpf/xmorpheo/<hid_id>.new`
+the new program, and pins it at `/sys/fs/bpf/xmorpheo/<hid_id>_new`
 before it touches the old one. If anything fails up to there, the old
 program stays and the error says why. Then it detaches the old program
 and renames the new pin into place. The kernel cannot swap the program of

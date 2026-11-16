@@ -257,8 +257,11 @@ trait Pins {
 }
 
 /// The temporary pin path of a new link that replaces the one at `path`.
+/// The BPF filesystem allows no dots in names, so it is `<hid_id>_new`.
 fn new_path(path: &Path) -> PathBuf {
-    path.with_extension("new")
+    let mut name = path.file_name().unwrap_or_default().to_os_string();
+    name.push("_new");
+    path.with_file_name(name)
 }
 
 /// Pins the new link at `path`. With `old`, a link is pinned there, and
