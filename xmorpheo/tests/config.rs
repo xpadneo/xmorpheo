@@ -375,3 +375,17 @@ fn empty_source_table() {
     assert!(matches!(err, Error::EmptySource { device: 1, .. }), "{err}");
     assert!(err.to_string().contains("source table is empty"), "{err}");
 }
+
+/// Tolerances must be finite numbers of at least 0.
+#[test]
+fn tolerance_not_finite() {
+    for t in ["inf", "-inf", "nan", "-0.5"] {
+        let err = Config::parse(&format!("tolerance = {t}\n")).unwrap_err();
+        assert!(matches!(err, Error::InvalidTolerance(_)), "{t}: {err}");
+        assert!(
+            err.to_string()
+                .contains("must be a finite number of at least 0"),
+            "{err}"
+        );
+    }
+}

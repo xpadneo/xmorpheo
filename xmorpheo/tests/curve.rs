@@ -230,3 +230,17 @@ fn too_many_knots_suggests_a_tolerance() {
         assert!(msg.contains(part), "{msg}");
     }
 }
+
+#[test]
+fn tolerance_not_finite() {
+    let f = formula("x");
+    let field = Field::new(AxisKind::Centered, 0, 1023).unwrap();
+    for t in [f64::INFINITY, f64::NEG_INFINITY, f64::NAN, -0.5] {
+        let err = fit(&f, &field, t).unwrap_err();
+        assert!(matches!(err, Error::InvalidTolerance(_)), "{t}: {err}");
+        assert!(
+            err.to_string()
+                .contains("must be a finite number of at least 0")
+        );
+    }
+}

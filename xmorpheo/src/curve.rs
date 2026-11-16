@@ -156,7 +156,9 @@ impl fmt::Display for Error {
                 f,
                 "logical range spans {span} values, at most {MAX_SPAN} are supported"
             ),
-            Error::InvalidTolerance(t) => write!(f, "tolerance {t} is negative"),
+            Error::InvalidTolerance(t) => {
+                write!(f, "tolerance {t} must be a finite number of at least 0")
+            }
             Error::NotFinite { x } => write!(f, "the formula is not finite at x = {x}"),
             Error::TooManyKnots {
                 formula,
@@ -381,7 +383,7 @@ fn fit_impl(
     tolerance: f64,
     clamp: bool,
 ) -> Result<Result<Vec<Knot>, usize>, Error> {
-    if tolerance.is_nan() || tolerance < 0.0 {
+    if !tolerance.is_finite() || tolerance < 0.0 {
         return Err(Error::InvalidTolerance(tolerance));
     }
     let (lowest, highest) = if clamp {

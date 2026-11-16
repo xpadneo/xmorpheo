@@ -134,7 +134,9 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::Toml(e) => write!(f, "{e}"),
-            Error::InvalidTolerance(t) => write!(f, "tolerance {t} is negative"),
+            Error::InvalidTolerance(t) => {
+                write!(f, "tolerance {t} must be a finite number of at least 0")
+            }
             Error::InvalidVariable {
                 device,
                 usage,
@@ -255,7 +257,7 @@ enum RawKind {
 }
 
 fn tolerance(t: f64) -> Result<f64, Error> {
-    if t.is_nan() || t < 0.0 {
+    if !t.is_finite() || t < 0.0 {
         return Err(Error::InvalidTolerance(t));
     }
     Ok(t)

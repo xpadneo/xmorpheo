@@ -215,7 +215,8 @@ device.
 
 ## Errors
 
-Unknown keys, unknown usages, axes listed twice, invalid formulas or
-variable names, and negative tolerances are reported when the
-configuration is read, with the number of the device entry and the axis.
+Unknown keys, unknown usages, axes listed twice, empty source tables,
+invalid formulas or variable names, and tolerances that are negative or
+not finite are reported when the configuration is read, with the number
+of the device entry and the axis.
 Variables that the formula does not use are a warning.
