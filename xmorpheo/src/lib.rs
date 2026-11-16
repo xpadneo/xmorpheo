@@ -5,3 +5,4 @@
 pub mod curve;
 pub mod descriptor;
 pub mod formula;
+pub mod usage;

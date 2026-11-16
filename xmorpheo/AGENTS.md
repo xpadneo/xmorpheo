@@ -14,6 +14,7 @@ command line tool.
 - `src/curve.rs` - knot fitting for curves, and a reference of the BPF-side
   fixed point math.
 - `src/formula.rs` - parser and evaluator for curve formulas.
+- `src/usage.rs` - names and default axis kinds of HID axis usages.
 - `src/<module>/tests.rs` - unit tests of `src/<module>.rs`.
 - `tests/` - tests that only use the public API of the library.
 - `tests/data/` - raw report descriptors of real devices, documented in
