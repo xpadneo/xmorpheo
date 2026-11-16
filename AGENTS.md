@@ -164,6 +164,7 @@ relevant child guide.
 
 - `.github/` - pull request template and future CI workflows.
 - `bpf/` - the HID-BPF program under GPL-2.0-only.
+- `dist/` - the udev rule that `make install` installs.
 - `docs/` - user-facing documentation, the design document, the list of
   ideas, and images.
 - `examples/` - example configurations and curve profiles under CC0-1.0.

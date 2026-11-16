@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Attaches the curves of the configuration in /etc/xmorpheo/conf.d and
+# the other drop-in directories to HID devices.
+#
+# "bind" instead of "add": only after the driver bound, the report
+# descriptor in sysfs has the fixups of the driver and the evdev nodes
+# exist. Devices that the configuration does not name return at once.
+
+ACTION=="bind", SUBSYSTEM=="hid", RUN+="@BINDIR@/xmorpheo udev bind %k"
+ACTION=="remove", SUBSYSTEM=="hid", RUN+="@BINDIR@/xmorpheo udev remove %k"

@@ -10,6 +10,8 @@ overview is `README.md` in the root, which links here.
 
 ## Ownership
 
+- `INSTALL.md` - building, installing, and uninstalling.
+- `PACKAGING.md` - notes for distribution package maintainers.
 - `DESIGN.md` - the architecture and the configuration format.
 - `IDEAS.md` - ideas for later that are out of scope for now.
 - `descriptors/` - captured HID report descriptors of real devices.
