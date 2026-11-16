@@ -10,6 +10,8 @@ command line tool.
 
 ## Ownership
 
+- `src/confd.rs` - finds, overrides, masks, and merges the configuration
+  drop-ins in the `conf.d` directories.
 - `src/config.rs` - reader for the TOML configuration.
 - `src/descriptor.rs` - HID report descriptor parser.
 - `src/curve.rs` - knot fitting for curves, and a reference of the BPF-side
