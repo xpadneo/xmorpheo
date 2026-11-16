@@ -20,6 +20,7 @@ overview is `README.md` in the root, which links here.
 - `DESIGN.md` - the architecture and the configuration format.
 - `IDEAS.md` - ideas for later that are out of scope for now.
 - `descriptors/` - captured HID report descriptors of real devices.
+- `img/` - images, including the logo in a light and a dark variant.
 
 
 ## Local Contracts
