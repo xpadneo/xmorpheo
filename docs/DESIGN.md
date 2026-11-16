@@ -267,8 +267,12 @@ bind`, which attaches the program if the configuration names the device.
 fixups of the driver and the evdev nodes exist. After a driver change, the
 program is replaced, because the descriptor may differ: the new program is
 planned and loaded first, then attached, and the old one detached. If that
-fails, the old program is detached anyway, because it was planned for the
-previous descriptor, and the error goes to the journal. Attaching and
+fails, for example with an error in the configuration, the old program
+stays if the report descriptor is the same as the one it was planned for,
+which attach keeps in `/run/xmorpheo/state/<hid_id>.rdesc` next to the
+pin. If the descriptor differs or is not known, the old program is
+detached, because its fields may no longer match. Either way, the error
+goes to the journal. Attaching and
 detaching hold a lock on the pin directory, so the rule and a manual
 `xmorpheo attach` never attach to a device twice. When the
 device disappears, the kernel detaches the program, and `xmorpheo udev

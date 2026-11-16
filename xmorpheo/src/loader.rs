@@ -25,6 +25,10 @@ use crate::plan::Plan;
 /// Where links are pinned.
 pub const PIN_DIR: &str = "/sys/fs/bpf/xmorpheo";
 
+/// Where the report descriptor that a pinned program was planned for is
+/// kept, as `<hid_id>.rdesc`. Like the pins, it is gone after a reboot.
+pub const STATE_DIR: &str = "/run/xmorpheo/state";
+
 const CAP_SYS_ADMIN: u32 = 21;
 const CAP_BPF: u32 = 39;
 
@@ -183,7 +187,12 @@ fn fill<T: Copy>(map: &impl MapCore, entries: &[T], what: &'static str) -> Resul
 /// when anything fails up to there, see [`install`]. The kernel cannot
 /// swap the program of a HID-BPF link in place, so for the moment between
 /// attaching the new and detaching the old one, both run.
-pub fn attach(hid_id: u32, plan: &Plan, replace: bool) -> Result<(PathBuf, bool), Error> {
+pub fn attach(
+    hid_id: u32,
+    plan: &Plan,
+    descriptor: &[u8],
+    replace: bool,
+) -> Result<(PathBuf, bool), Error> {
     let path = pin_path(hid_id);
     // Fail early, before loading; checked again under the lock.
     if !replace && pinned(&path)? {
@@ -228,6 +237,11 @@ pub fn attach(hid_id: u32, plan: &Plan, replace: bool) -> Result<(PathBuf, bool)
             .map_err(|e| Error::Bpf("attaching to the HID device", e))?,
     );
     install(&mut BpfPins { link: &mut link }, &path, old)?;
+    // Still under the lock, so it matches the pinned program.
+    let state = state_path(hid_id);
+    fs::create_dir_all(STATE_DIR)
+        .and_then(|()| fs::write(&state, descriptor))
+        .map_err(|e| Error::Io(state, e))?;
     Ok((path, old))
 }
 
@@ -323,7 +337,19 @@ pub fn detach(hid_id: u32) -> Result<bool, Error> {
         return Ok(false);
     }
     unpin_link(&path).map_err(|e| Error::Io(path, e))?;
+    let _ = fs::remove_file(state_path(hid_id));
     Ok(true)
+}
+
+/// The path of the report descriptor of a pinned program.
+fn state_path(hid_id: u32) -> PathBuf {
+    Path::new(STATE_DIR).join(format!("{hid_id}.rdesc"))
+}
+
+/// The report descriptor that the program attached to a device was
+/// planned for, if it is known.
+pub fn attached_descriptor(hid_id: u32) -> Option<Vec<u8>> {
+    fs::read(state_path(hid_id)).ok()
 }
 
 /// Detaches the link pinned at `path` and removes the pin.

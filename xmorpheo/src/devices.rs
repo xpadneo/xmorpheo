@@ -293,7 +293,8 @@ fn attach_one(
     let entry = config
         .find(dev.vendor, dev.product, &dev.uniq)
         .ok_or("the configuration has no entry for this device")?;
-    let desc = descriptor::parse_descriptor(&dev.report_descriptor()?)?;
+    let raw = dev.report_descriptor()?;
+    let desc = descriptor::parse_descriptor(&raw)?;
     let plan = plan::plan(entry, &desc)?;
     if dry_run || verbose {
         print_plan(dev, entry, &plan);
@@ -330,7 +331,7 @@ fn attach_one(
         return Ok(());
     }
 
-    let (pin, replaced) = loader::attach(dev.hid_id, &plan, replace)?;
+    let (pin, replaced) = loader::attach(dev.hid_id, &plan, &raw, replace)?;
     let what = if replaced { "replaced" } else { "attached" };
     let evdev = set_evdev(dev, entry);
     if verbose {

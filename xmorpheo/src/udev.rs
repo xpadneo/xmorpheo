@@ -62,24 +62,48 @@ pub fn decide(config: Option<&Config>, sysname: &str) -> Decision {
 
 fn bind(sysname: &str) -> Result<(), Box<dyn Error>> {
     let result = attach(sysname);
-    if result.is_err() {
-        // A new driver may come with a different descriptor, so a program
-        // planned for the previous one must not stay.
-        if let Some((_, _, _, hid_id)) = sysfs::parse_sysname(sysname) {
-            match loader::detach(hid_id) {
-                Ok(true) => log(
-                    libc::LOG_INFO,
-                    &format!("{sysname}: detached the previous program"),
-                ),
-                Ok(false) => {}
-                Err(e) => log(
-                    libc::LOG_ERR,
-                    &format!("{sysname}: detaching the previous program: {e}"),
-                ),
-            }
-        }
+    let (Err(error), Some((_, _, _, hid_id))) = (&result, sysfs::parse_sysname(sysname)) else {
+        return result;
+    };
+    // A program planned for the same descriptor stays, for example after
+    // a configuration error. A new driver may come with a different
+    // descriptor, so otherwise the program must not stay.
+    let current = std::fs::read(
+        Path::new(sysfs::HID_DEVICES)
+            .join(sysname)
+            .join("report_descriptor"),
+    );
+    if loader::is_attached(hid_id) == Some(true)
+        && keep_previous(
+            loader::attached_descriptor(hid_id).as_deref(),
+            current.ok().as_deref(),
+        )
+    {
+        log(
+            libc::LOG_INFO,
+            &format!("{sysname}: kept the previous program, descriptor unchanged: {error}"),
+        );
+        return result;
+    }
+    match loader::detach(hid_id) {
+        Ok(true) => log(
+            libc::LOG_INFO,
+            &format!("{sysname}: detached the previous program"),
+        ),
+        Ok(false) => {}
+        Err(e) => log(
+            libc::LOG_ERR,
+            &format!("{sysname}: detaching the previous program: {e}"),
+        ),
     }
     result
+}
+
+/// Whether the previous program of a device stays after a failed bind:
+/// only if the descriptor it was planned for is known and the same as the
+/// current one.
+fn keep_previous(planned_for: Option<&[u8]>, current: Option<&[u8]>) -> bool {
+    matches!((planned_for, current), (Some(a), Some(b)) if a == b)
 }
 
 /// Plans the device and loads its program first, then replaces a program
@@ -96,9 +120,10 @@ fn attach(sysname: &str) -> Result<(), Box<dyn Error>> {
     };
 
     loader::preflight()?;
-    let desc = descriptor::parse_descriptor(&dev.report_descriptor()?)?;
+    let raw = dev.report_descriptor()?;
+    let desc = descriptor::parse_descriptor(&raw)?;
     let plan = plan::plan(entry, &desc)?;
-    let (pin, replaced) = loader::attach(dev.hid_id, &plan, true)?;
+    let (pin, replaced) = loader::attach(dev.hid_id, &plan, &raw, true)?;
     let axes = devices::set_evdev(&dev, entry);
     log(
         libc::LOG_INFO,

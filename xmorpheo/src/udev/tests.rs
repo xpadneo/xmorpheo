@@ -33,3 +33,15 @@ fn unknown_actions_do_nothing() {
     assert!(run("change", "0003:231D:0200.000A").is_ok());
     assert!(remove("not-a-device").is_ok());
 }
+
+/// After a failed bind, the previous program stays only for the same
+/// descriptor it was planned for.
+#[test]
+fn keep_previous_program() {
+    let desc = [0x05u8, 0x01, 0x09, 0x04];
+    assert!(keep_previous(Some(&desc), Some(&desc)));
+    assert!(!keep_previous(Some(&desc), Some(&desc[..3])));
+    assert!(!keep_previous(None, Some(&desc)));
+    assert!(!keep_previous(Some(&desc), None));
+    assert!(!keep_previous(None, None));
+}
