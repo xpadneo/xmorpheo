@@ -419,9 +419,19 @@ fn evdev_warnings(entry: &config::Device, present: &[u16]) -> Vec<String> {
 pub fn detach(selectors: &[String], all: bool) -> Result<(), Box<dyn Error>> {
     let ids: Vec<u32> = if all {
         match std::fs::read_dir(loader::PIN_DIR) {
-            Ok(entries) => entries
-                .filter_map(|e| e.ok()?.file_name().to_str()?.parse().ok())
-                .collect(),
+            Ok(entries) => {
+                // A temporary pin "<hid_id>.new" of an interrupted replace
+                // belongs to its device too.
+                let mut ids: Vec<u32> = entries
+                    .filter_map(|e| {
+                        let name = e.ok()?.file_name().into_string().ok()?;
+                        name.trim_end_matches(".new").parse().ok()
+                    })
+                    .collect();
+                ids.sort_unstable();
+                ids.dedup();
+                ids
+            }
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Vec::new(),
             Err(e) => return Err(format!("{}: {e}", loader::PIN_DIR).into()),
         }

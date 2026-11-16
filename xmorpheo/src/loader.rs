@@ -37,6 +37,13 @@ pub enum Error {
     AlreadyAttached(PathBuf),
     Io(PathBuf, io::Error),
     Bpf(&'static str, libbpf_rs::Error),
+    /// The old program is detached and the new one runs, but it stays
+    /// pinned at the temporary path.
+    NotRenamed {
+        from: PathBuf,
+        to: PathBuf,
+        error: io::Error,
+    },
 }
 
 impl fmt::Display for Error {
@@ -67,6 +74,13 @@ impl fmt::Display for Error {
             }
             Error::Io(path, e) => write!(f, "{}: {e}", path.display()),
             Error::Bpf(what, e) => write!(f, "{what}: {e}"),
+            Error::NotRenamed { from, to, error } => write!(
+                f,
+                "the new program runs, but its link stays pinned at {} instead of {}: \
+                 {error}; the next attach or detach moves it",
+                from.display(),
+                to.display()
+            ),
         }
     }
 }
@@ -164,11 +178,11 @@ fn fill<T: Copy>(map: &impl MapCore, entries: &[T], what: &'static str) -> Resul
 /// the link. Returns the pin path, and whether it replaced a program.
 ///
 /// With `replace`, a program that is already attached is replaced, else
-/// that is an error. The new program is loaded first and attached before
-/// the old one is detached, so the old one stays when anything fails up
-/// to there. The kernel cannot swap the program of a HID-BPF link in
-/// place, so for the moment between attaching the new and detaching the
-/// old one, both run.
+/// that is an error. The new program is loaded, attached, and pinned at a
+/// temporary path before the old one is detached, so the old one stays
+/// when anything fails up to there, see [`install`]. The kernel cannot
+/// swap the program of a HID-BPF link in place, so for the moment between
+/// attaching the new and detaching the old one, both run.
 pub fn attach(hid_id: u32, plan: &Plan, replace: bool) -> Result<(PathBuf, bool), Error> {
     let path = pin_path(hid_id);
     // Fail early, before loading; checked again under the lock.
@@ -201,47 +215,125 @@ pub fn attach(hid_id: u32, plan: &Plan, replace: bool) -> Result<(PathBuf, bool)
 
     fs::create_dir_all(PIN_DIR).map_err(|e| Error::Io(PIN_DIR.into(), e))?;
     let _lock = lock(Path::new(PIN_DIR))?;
+    let mut link = None;
+    recover(&mut BpfPins { link: &mut link }, &path)?;
     let old = pinned(&path)?;
     if old && !replace {
         return Err(Error::AlreadyAttached(path));
     }
-    let mut link = skel
-        .maps
-        .xmorpheo
-        .attach_struct_ops()
-        .map_err(|e| Error::Bpf("attaching to the HID device", e))?;
-    if old {
-        unpin(&path)?;
-    }
-    link.pin(&path)
-        .map_err(|e| Error::Bpf("pinning the link", e))?;
+    link = Some(
+        skel.maps
+            .xmorpheo
+            .attach_struct_ops()
+            .map_err(|e| Error::Bpf("attaching to the HID device", e))?,
+    );
+    install(&mut BpfPins { link: &mut link }, &path, old)?;
     Ok((path, old))
+}
+
+/// The pin operations of attaching, behind a trait so their order and its
+/// failures can be tested without BPF.
+trait Pins {
+    fn exists(&self, path: &Path) -> bool;
+    /// Pins the new link at `path`.
+    fn pin_new(&mut self, path: &Path) -> io::Result<()>;
+    /// Detaches the link pinned at `path` and removes the pin.
+    fn unpin(&mut self, path: &Path) -> io::Result<()>;
+    fn rename(&mut self, from: &Path, to: &Path) -> io::Result<()>;
+}
+
+/// The temporary pin path of a new link that replaces the one at `path`.
+fn new_path(path: &Path) -> PathBuf {
+    path.with_extension("new")
+}
+
+/// Pins the new link at `path`. With `old`, a link is pinned there, and
+/// the new one replaces it: it is pinned at a temporary path first, so the
+/// old link stays if that fails, then the old link is detached, and the
+/// new one renamed into place. Exactly one link stays pinned, the old or
+/// the new one.
+fn install(pins: &mut impl Pins, path: &Path, old: bool) -> Result<(), Error> {
+    if !old {
+        return pins.pin_new(path).map_err(|e| Error::Io(path.into(), e));
+    }
+    let tmp = new_path(path);
+    pins.pin_new(&tmp).map_err(|e| Error::Io(tmp.clone(), e))?;
+    if let Err(e) = pins.unpin(path) {
+        let _ = pins.unpin(&tmp);
+        return Err(Error::Io(path.into(), e));
+    }
+    pins.rename(&tmp, path).map_err(|error| Error::NotRenamed {
+        from: tmp,
+        to: path.into(),
+        error,
+    })
+}
+
+/// Cleans up after a run that was interrupted while replacing the link at
+/// `path`: a temporary pin next to a link is dropped, one without a link
+/// moved into place, because it is the only one running.
+fn recover(pins: &mut impl Pins, path: &Path) -> Result<(), Error> {
+    let tmp = new_path(path);
+    if !pins.exists(&tmp) {
+        return Ok(());
+    }
+    if pins.exists(path) {
+        pins.unpin(&tmp).map_err(|e| Error::Io(tmp, e))
+    } else {
+        pins.rename(&tmp, path).map_err(|e| Error::Io(tmp, e))
+    }
+}
+
+/// The pins in the BPF filesystem, with the new link, if any.
+struct BpfPins<'a> {
+    link: &'a mut Option<Link>,
+}
+
+impl Pins for BpfPins<'_> {
+    fn exists(&self, path: &Path) -> bool {
+        path.exists()
+    }
+
+    fn pin_new(&mut self, path: &Path) -> io::Result<()> {
+        let link = self.link.as_mut().expect("a new link to pin");
+        link.pin(path).map_err(|e| io::Error::other(e.to_string()))
+    }
+
+    fn unpin(&mut self, path: &Path) -> io::Result<()> {
+        unpin_link(path)
+    }
+
+    fn rename(&mut self, from: &Path, to: &Path) -> io::Result<()> {
+        fs::rename(from, to)
+    }
 }
 
 /// Detaches the program from a device and removes the pin. Returns false
 /// if nothing was attached.
 pub fn detach(hid_id: u32) -> Result<bool, Error> {
     let path = pin_path(hid_id);
-    if !pinned(&path)? {
+    if !pinned(&path)? && !pinned(&new_path(&path))? {
         return Ok(false);
     }
     let _lock = lock(Path::new(PIN_DIR))?;
+    let mut none = None;
+    recover(&mut BpfPins { link: &mut none }, &path)?;
     // Another run may have detached it while this one waited.
     if !pinned(&path)? {
         return Ok(false);
     }
-    unpin(&path)?;
+    unpin_link(&path).map_err(|e| Error::Io(path, e))?;
     Ok(true)
 }
 
 /// Detaches the link pinned at `path` and removes the pin.
-fn unpin(path: &Path) -> Result<(), Error> {
+fn unpin_link(path: &Path) -> io::Result<()> {
     // Detach explicitly where the kernel supports it. Otherwise removing
     // the last reference, the pin, releases the link.
     if let Ok(link) = Link::open(path) {
         let _ = link.detach();
     }
-    fs::remove_file(path).map_err(|e| Error::Io(path.into(), e))
+    fs::remove_file(path)
 }
 
 /// Takes an exclusive lock on a directory, waiting for other holders.

@@ -54,3 +54,104 @@ fn already_attached_suggests_replace() {
     assert!(msg.contains("/sys/fs/bpf/xmorpheo/7"), "{msg}");
     assert!(msg.contains("--replace"), "{msg}");
 }
+
+/// Pins in memory, each with the program it holds, with failures to
+/// inject.
+#[derive(Default)]
+struct FakePins {
+    pinned: std::collections::BTreeMap<PathBuf, &'static str>,
+    fail_pin: bool,
+    fail_unpin: bool,
+    fail_rename: bool,
+}
+
+impl Pins for FakePins {
+    fn exists(&self, path: &Path) -> bool {
+        self.pinned.contains_key(path)
+    }
+    fn pin_new(&mut self, path: &Path) -> io::Result<()> {
+        if self.fail_pin {
+            return Err(io::Error::other("pin failed"));
+        }
+        self.pinned.insert(path.into(), "new");
+        Ok(())
+    }
+    fn unpin(&mut self, path: &Path) -> io::Result<()> {
+        if self.fail_unpin && self.pinned.get(path) == Some(&"old") {
+            return Err(io::Error::other("unpin failed"));
+        }
+        self.pinned.remove(path);
+        Ok(())
+    }
+    fn rename(&mut self, from: &Path, to: &Path) -> io::Result<()> {
+        if self.fail_rename {
+            return Err(io::Error::other("rename failed"));
+        }
+        let p = self.pinned.remove(from).unwrap();
+        self.pinned.insert(to.into(), p);
+        Ok(())
+    }
+}
+
+fn with_old() -> FakePins {
+    let mut p = FakePins::default();
+    p.pinned.insert(pin_path(7), "old");
+    p
+}
+
+fn programs(p: &FakePins) -> Vec<(&str, &str)> {
+    p.pinned
+        .iter()
+        .map(|(k, v)| (k.file_name().unwrap().to_str().unwrap(), *v))
+        .collect()
+}
+
+#[test]
+fn replace_pins_the_new_program() {
+    let mut p = with_old();
+    install(&mut p, &pin_path(7), true).unwrap();
+    assert_eq!(programs(&p), [("7", "new")]);
+
+    let mut p = FakePins::default();
+    install(&mut p, &pin_path(7), false).unwrap();
+    assert_eq!(programs(&p), [("7", "new")]);
+}
+
+#[test]
+fn replace_keeps_the_old_program_when_pinning_fails() {
+    let mut p = with_old();
+    p.fail_pin = true;
+    assert!(install(&mut p, &pin_path(7), true).is_err());
+    assert_eq!(programs(&p), [("7", "old")]);
+}
+
+#[test]
+fn replace_keeps_the_old_program_when_unpinning_it_fails() {
+    let mut p = with_old();
+    p.fail_unpin = true;
+    assert!(install(&mut p, &pin_path(7), true).is_err());
+    assert_eq!(programs(&p), [("7", "old")]);
+}
+
+#[test]
+fn replace_says_where_the_new_program_stays_when_renaming_fails() {
+    let mut p = with_old();
+    p.fail_rename = true;
+    let err = install(&mut p, &pin_path(7), true).unwrap_err();
+    assert_eq!(programs(&p), [("7.new", "new")]);
+    let msg = err.to_string();
+    assert!(msg.contains("/sys/fs/bpf/xmorpheo/7.new"), "{msg}");
+
+    // The next run under the lock moves it into place.
+    p.fail_rename = false;
+    recover(&mut p, &pin_path(7)).unwrap();
+    assert_eq!(programs(&p), [("7", "new")]);
+}
+
+#[test]
+fn recover_drops_a_temporary_pin_next_to_a_program() {
+    let mut p = with_old();
+    p.pinned.insert(pin_path(7).with_extension("new"), "new");
+    recover(&mut p, &pin_path(7)).unwrap();
+    assert_eq!(programs(&p), [("7", "old")]);
+}
