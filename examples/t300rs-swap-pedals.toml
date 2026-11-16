@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: CC0-1.0
+#
+# Swaps the brake and clutch pedals of a Thrustmaster T300 RS (GT) with
+# the hid-tmff2 driver, for games and their templates that expect the
+# pedals the other way around, see
+# https://github.com/Kimplul/hid-tmff2/issues/233.
+#
+# Written for hid-tmff2. Newer wheels with a PS3-PS4/PC switch use the PC
+# mode, older wheels the PS3 mode, as hid-tmff2 recommends. The product ID
+# 0xb66e (PS3 normal mode in hid-tmff2) is only confirmed for a newer wheel
+# in PC mode; check yours with "xmorpheo list". With 0xb66e, the report
+# descriptor names the pedals Rz (brake), Z (gas), and Y (clutch), see
+# docs/descriptors/t300rs_pc_mode.md. Other modes, other product IDs, and
+# other drivers may name them differently, so check with
+# "xmorpheo template" first.
+#
+# Not tested on the device yet. Check with evtest that the pedals are
+# swapped after attaching.
+#
+# Each pedal reads the other one as its source. Both formulas read the
+# values the wheel sent, so the order of the entries does not matter.
+
+[[device]]
+name = "Thrustmaster T300 RS (PC mode, hid-tmff2), swapped pedals"
+vendor = 0x044f
+product = 0xb66e
+
+[[device.axis]]
+usage = "Rz"              # brake, now reads the clutch pedal
+kind = "unipolar"
+source.x = { usage = "Y", kind = "unipolar" }
+curve = "x"
+
+[[device.axis]]
+usage = "Y"               # clutch, now reads the brake pedal
+kind = "unipolar"
+source.x = { usage = "Rz", kind = "unipolar" }
+curve = "x"
+
+# The gas pedal (Z) stays untouched. A curve on a swapped pedal goes into
+# the same formula, for example a progressive brake on what is now Rz:
+#
+#   curve = "pow(x, 1.5)"

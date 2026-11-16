@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: CC0-1.0
+#
+# Both triggers of an Xbox Wireless Controller combined into one rotation
+# axis, like the former combined trigger axis of xpadneo, with the sticks
+# of xbox-wireless-controller.toml. A configuration has one entry per
+# device, so use this file instead of that one, not next to it.
+#
+# Written for xpadneo and the Xbox Series X|S controller over Bluetooth LE
+# (product ID 0x0b13 in the sysfs name), see xbox-wireless-controller.toml
+# and docs/descriptors/xbox_series_xs_ble.md.
+#
+# The left trigger axis (Z) becomes the combined axis: released triggers
+# rest in the middle, the right trigger turns it one way, the left trigger
+# the other way. The right trigger axis (Rz) stays at rest. Both formulas
+# read the values the controller sent, so pinning Rz does not change what
+# the combined axis reads.
+#
+# Games that still treat ABS_Z as a trigger see the middle as half pressed.
+# Bind the combined axis as an axis, not as a trigger.
+
+[constants]
+k = 0.4
+
+[[device]]
+name = "Xbox Wireless Controller (Series X|S, Bluetooth LE), combined triggers"
+vendor = 0x045e
+product = 0x0b13
+evdev = "keep"            # keep the evdev fuzz and flat of xpadneo
+
+[[device.axis]]
+usage = "X"               # left stick, 16 bit
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Y"
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Rx"              # right stick, 16 bit
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Ry"
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Z"               # the combined axis, 10 bit, rests near 512
+kind = "centered"
+source.l = { usage = "Z", kind = "unipolar" }   # left trigger
+source.r = { usage = "Rz", kind = "unipolar" }  # right trigger
+curve = "r - l"
+
+[[device.axis]]
+usage = "Rz"              # right trigger, pinned at rest
+kind = "unipolar"
+curve = "0"

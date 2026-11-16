@@ -2,6 +2,7 @@
 
 //! Response curves for HID joysticks and gamepads using HID-BPF.
 
+pub mod config;
 pub mod curve;
 pub mod descriptor;
 pub mod formula;

@@ -10,6 +10,7 @@ command line tool.
 
 ## Ownership
 
+- `src/config.rs` - reader for the TOML configuration.
 - `src/descriptor.rs` - HID report descriptor parser.
 - `src/curve.rs` - knot fitting for curves, and a reference of the BPF-side
   fixed point math.

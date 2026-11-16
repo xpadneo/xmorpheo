@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: CC0-1.0
+#
+# Response curves for an Xbox Wireless Controller with the xpadneo driver.
+#
+# Written for xpadneo: it renames the axes in the report descriptor, so the
+# right stick is Rx/Ry and the triggers are Z/Rz. With other drivers, the
+# right stick is Z/Rz and the triggers are Brake/Accelerator, so this file
+# does not fit. Check with "xmorpheo template" for your setup.
+#
+# The product ID is the one in the sysfs name of the device, for example
+# 0005:045E:0B13.0011, as "xmorpheo list" shows it. xpadneo reports a
+# different product ID (0x028e) in HID_ID and evdev, which does not match.
+# Measured: 0x0b13 is the Xbox Series X|S controller over Bluetooth LE, see
+# docs/descriptors/xbox_series_xs_ble.md. Other models and connections have
+# other product IDs. Copy the [[device]] entry and change the product to
+# what "xmorpheo list" shows for your controller.
+#
+# The sticks get a mild expo curve: (1 - k) * x + k * x^3 with k = 0.4 has
+# a slope of 0.6 at the center and 1.8 at full deflection, 44 % output at
+# half deflection. Gamepad sticks are short, so a stronger curve feels
+# sluggish quickly. Try "xmorpheo curve" to compare values of k.
+#
+# xmorpheo sets the evdev fuzz and flat of all axes to 0 by default. xpadneo
+# chooses them itself, a flat of 3072 on the sticks as a deadzone hint for
+# programs that read evdev, so this example keeps them with evdev = "keep".
+# Remove that line to get fuzz 0 and flat 0. Games under Proton apply their
+# own deadzone. Gamepad sticks center less exactly than flight sticks, so
+# if a released stick drifts in a game, put a small deadzone into the curve,
+# for example:
+#
+#   curve = "(1 - k) * deadzone(x, 0.05) + k * pow(deadzone(x, 0.05), 3)"
+
+[constants]
+k = 0.4
+
+[[device]]
+name = "Xbox Wireless Controller (Series X|S, Bluetooth LE)"
+vendor = 0x045e
+product = 0x0b13
+evdev = "keep"            # keep the evdev fuzz and flat of xpadneo
+
+[[device.axis]]
+usage = "X"               # left stick, 16 bit
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Y"
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Rx"              # right stick, 16 bit
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+[[device.axis]]
+usage = "Ry"
+curve = "(1 - k) * x + k * pow(x, 3)"
+
+# The triggers stay linear. They are Z and Rz under xpadneo, which default
+# to centered, so a curve for them needs kind = "unipolar". For finer
+# control at the start of the travel, for example:
+#
+# [[device.axis]]
+# usage = "Z"             # left trigger, 10 bit
+# kind = "unipolar"
+# curve = "pow(x, 1.5)"
+#
+# [[device.axis]]
+# usage = "Rz"            # right trigger, 10 bit
+# kind = "unipolar"
+# curve = "pow(x, 1.5)"

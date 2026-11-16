@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: CC0-1.0
+#
+# Response curves for a pair of VKB Gladiator EVO sticks.
+#
+# Link or copy this file into /etc/xmorpheo/conf.d to use it, see
+# docs/INSTALL.md. The format is described in docs/CONFIG.md.
+#
+# The curves are expo curves: (1 - k) * x + k * x^3. They keep a linear,
+# reduced slope of 1 - k at the center, so small corrections still move
+# the ship, and reach full deflection at the edges. A larger k gives
+# finer control around the center, which helps with aiming and flight
+# assist off.
+#
+# There is no deadzone: the sensors of the sticks are precise, and games
+# such as Elite Dangerous apply their own deadzone.
+#
+# The axes follow the default mapping of the VKB firmware profile. A
+# custom profile may assign them differently.
+#
+# Both sticks use the same report descriptor, see
+# docs/descriptors/vkb_gladiator_evo_l.md. Measured with evtest: X/Y
+# (0..4095) are the stick, Rz (0..2047) is the twist, and Rx/Ry (0..1023)
+# are the analog ministick. A click toggles the ministick between analog
+# and the digital hat switch. Z (0..2047) is the throttle lever at the
+# base. The ministick and the throttle stay untouched. A curve for the
+# throttle needs kind = "unipolar", because Z defaults to centered. The
+# two fields without a usage are unassigned in the default profile.
+#
+# With the evdev fuzz set to 0, the sticks return exactly to the center.
+# The default fuzz of hid-input (range >> 8) makes the reported rest
+# position stay up to about +/-4 counts off center.
+
+[constants]
+k_stick = 0.6           # X/Y: slope 0.4 at the center
+k_twist = 0.75          # Rz: slope 0.25 at the center
+
+[[device]]
+name = "VKB Gladiator EVO L"
+vendor = 0x231d
+product = 0x0201
+
+[[device.axis]]
+usage = "X"             # Generic Desktop X, 12 bit
+curve = "(1 - k_stick) * x + k_stick * pow(x, 3)"
+
+[[device.axis]]
+usage = "Y"             # Generic Desktop Y, 12 bit
+curve = "(1 - k_stick) * x + k_stick * pow(x, 3)"
+
+[[device.axis]]
+usage = "Rz"            # Generic Desktop Rz, twist (measured), 11 bit
+curve = "(1 - k_twist) * x + k_twist * pow(x, 3)"
+
+[[device]]
+name = "VKB Gladiator EVO R"
+vendor = 0x231d
+product = 0x0200
+
+[[device.axis]]
+usage = "X"             # Generic Desktop X, 12 bit
+curve = "(1 - k_stick) * x + k_stick * pow(x, 3)"
+
+[[device.axis]]
+usage = "Y"             # Generic Desktop Y, 12 bit
+curve = "(1 - k_stick) * x + k_stick * pow(x, 3)"
+
+[[device.axis]]
+usage = "Rz"            # Generic Desktop Rz, twist (measured), 11 bit
+curve = "(1 - k_twist) * x + k_twist * pow(x, 3)"
