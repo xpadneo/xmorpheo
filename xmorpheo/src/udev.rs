@@ -147,10 +147,22 @@ fn remove(sysname: &str) -> Result<(), Box<dyn Error>> {
     let Some((_, _, _, hid_id)) = sysfs::parse_sysname(sysname) else {
         return Ok(());
     };
-    if loader::detach(hid_id)? {
-        log(libc::LOG_INFO, &format!("{sysname}: removed the pin"));
+    // The rule runs for every HID device. A pin left by a device that the
+    // configuration no longer names is still removed, but errors only
+    // matter for devices that it names.
+    let config = devices::read_config(None).ok();
+    match loader::detach(hid_id) {
+        Ok(true) => log(libc::LOG_INFO, &format!("{sysname}: removed the pin")),
+        Ok(false) => {}
+        Err(e) if configured(config.as_ref(), sysname) => return Err(e.into()),
+        Err(_) => {}
     }
     Ok(())
+}
+
+/// Whether the configuration may name a device, or cannot be read.
+fn configured(config: Option<&Config>, sysname: &str) -> bool {
+    config.is_none_or(|c| decide(Some(c), sysname) == Decision::Attach)
 }
 
 /// Runs `xmorpheo udev <action> <sysname>`. Errors are logged, and the

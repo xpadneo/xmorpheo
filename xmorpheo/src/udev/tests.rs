@@ -45,3 +45,13 @@ fn keep_previous_program() {
     assert!(!keep_previous(Some(&desc), None));
     assert!(!keep_previous(None, None));
 }
+
+/// Errors of removing a device only matter for devices that the
+/// configuration names, or when the configuration cannot be read.
+#[test]
+fn remove_errors_of_configured_devices() {
+    let config = Config::parse(VKB).unwrap();
+    assert!(configured(Some(&config), "0003:231D:0200.000A"));
+    assert!(!configured(Some(&config), "0003:046D:C52B.0003"));
+    assert!(configured(None, "0003:046D:C52B.0003"));
+}
