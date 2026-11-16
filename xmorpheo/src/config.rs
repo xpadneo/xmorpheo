@@ -119,6 +119,10 @@ pub enum Error {
         device: usize,
         usage: Usage,
     },
+    EmptySource {
+        device: usize,
+        usage: Usage,
+    },
     Formula {
         device: usize,
         usage: Usage,
@@ -157,6 +161,12 @@ impl fmt::Display for Error {
             Error::DuplicateAxis { device, usage } => {
                 write!(f, "device {device}: axis {} is listed twice", name(*usage))
             }
+            Error::EmptySource { device, usage } => write!(
+                f,
+                "device {device}, axis {}: the source table is empty, remove it to read the \
+                 axis itself",
+                name(*usage)
+            ),
             Error::Formula {
                 device,
                 usage,
@@ -277,6 +287,9 @@ impl Config {
                         usage,
                         kind,
                     }],
+                    Some(table) if table.is_empty() => {
+                        return Err(Error::EmptySource { device, usage });
+                    }
                     Some(table) => {
                         let mut sources = Vec::new();
                         for (name, src) in table {

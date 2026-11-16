@@ -364,3 +364,14 @@ fn recipes() {
     }
     assert_eq!(count, 9);
 }
+
+/// An empty source table leaves a formula without variables to read, so
+/// it is rejected instead of reading the axis itself.
+#[test]
+fn empty_source_table() {
+    let toml = "[[device]]\nvendor = 1\nproduct = 2\n\
+                [[device.axis]]\nusage = \"X\"\ncurve = \"0\"\nsource = {}\n";
+    let err = Config::parse(toml).unwrap_err();
+    assert!(matches!(err, Error::EmptySource { device: 1, .. }), "{err}");
+    assert!(err.to_string().contains("source table is empty"), "{err}");
+}
