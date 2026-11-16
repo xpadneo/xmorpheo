@@ -11,6 +11,11 @@ overview is `README.md` in the root, which links here.
 ## Ownership
 
 - `INSTALL.md` - building, installing, and uninstalling.
+- `CONFIG.md` - the configuration file for users.
+- `FORMULAS.md` - the curve formula language for users.
+- `RECIPES.md` - short configurations for common problems, parsed by the
+  tests of `xmorpheo/tests/config.rs` and `plan.rs`.
+- `CLI.md` - the commands of the tool, and troubleshooting.
 - `PACKAGING.md` - notes for distribution package maintainers.
 - `DESIGN.md` - the architecture and the configuration format.
 - `IDEAS.md` - ideas for later that are out of scope for now.

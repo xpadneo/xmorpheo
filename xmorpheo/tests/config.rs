@@ -345,3 +345,22 @@ fn t300rs_swap_pedals_example() {
     let u = AxisKind::Unipolar;
     assert_eq!(swaps, [(rz, y, u, u), (y, rz, u, u)]);
 }
+
+/// Every TOML block of the recipes is a valid configuration.
+#[test]
+fn recipes() {
+    let recipes = include_str!("../../docs/RECIPES.md");
+    let mut count = 0;
+    for block in recipes.split("```toml\n").skip(1) {
+        let toml = &block[..block.find("```").unwrap()];
+        let config = Config::parse(toml).unwrap_or_else(|e| panic!("{e} in\n{toml}"));
+        assert!(
+            config.warnings.is_empty(),
+            "{:?} in\n{toml}",
+            config.warnings
+        );
+        assert!(!config.devices[0].axes.is_empty());
+        count += 1;
+    }
+    assert_eq!(count, 9);
+}

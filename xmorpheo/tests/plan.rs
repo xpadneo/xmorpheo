@@ -227,6 +227,24 @@ fn t300rs_swap_pedals_example() {
     );
 }
 
+/// The recipes plan against the descriptors of their devices.
+#[test]
+fn recipes_plan() {
+    let recipes = include_str!("../../docs/RECIPES.md");
+    for block in recipes.split("```toml\n").skip(1) {
+        let toml = &block[..block.find("```").unwrap()];
+        let config = Config::parse(toml).unwrap();
+        let dev = &config.devices[0];
+        let desc: &[u8] = match (dev.vendor, dev.product) {
+            (0x231d, 0x0200) => VKB_EVO,
+            (0x045e, 0x0b13) => XBOX,
+            (0x044f, 0xb66e) => include_bytes!("data/t300rs_pc_mode.rdesc"),
+            other => panic!("no descriptor for {other:04x?}"),
+        };
+        plan(dev, &parse_descriptor(desc).unwrap()).unwrap_or_else(|e| panic!("{e} in\n{toml}"));
+    }
+}
+
 #[test]
 fn too_many_knots_names_the_tolerance_of_the_axis() {
     let config = Config::parse(
