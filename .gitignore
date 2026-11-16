@@ -1,0 +1,9 @@
+*~
+/.cache
+/.vscode
+/.zed
+/compile_commands.json
+/target/
+*.bpf.o
+*.skel.h
+vmlinux.h
