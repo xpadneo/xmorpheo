@@ -10,6 +10,9 @@ command line tool.
 
 ## Ownership
 
+- `build.rs` - builds the BPF program into a libbpf-rs skeleton, and the
+  host build of its math for tests.
+- `src/bpf.rs` - the skeleton, and the conversion into its map layout.
 - `src/confd.rs` - finds, overrides, masks, and merges the configuration
   drop-ins in the `conf.d` directories.
 - `src/config.rs` - reader for the TOML configuration.
@@ -17,6 +20,9 @@ command line tool.
 - `src/curve.rs` - knot fitting for curves, and a reference of the BPF-side
   fixed point math.
 - `src/formula.rs` - parser and evaluator for curve formulas.
+- `src/plan.rs` - maps a configured device and its descriptor to the
+  tables, curves, and knots of the BPF program, and the Rust reference of
+  its rewrite.
 - `src/usage.rs` - names and default axis kinds of HID axis usages.
 - `src/<module>/tests.rs` - unit tests of `src/<module>.rs`.
 - `tests/` - tests that only use the public API of the library.
