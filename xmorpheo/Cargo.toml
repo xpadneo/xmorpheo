@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+[package]
+name = "xmorpheo"
+description = "Response curves for HID joysticks and gamepads using HID-BPF"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+libbpf-rs = "0.27.2"
+libc = "0.2.191"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.2.1"
+
+[build-dependencies]
+cc = "1.11.2"
+libbpf-cargo = "0.27.2"
