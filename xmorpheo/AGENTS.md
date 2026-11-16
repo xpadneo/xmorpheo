@@ -19,10 +19,12 @@ command line tool.
 - `src/descriptor.rs` - HID report descriptor parser.
 - `src/curve.rs` - knot fitting for curves, and a reference of the BPF-side
   fixed point math.
+- `src/evdev.rs` - fuzz and flat of evdev axes through `EVIOCSABS`.
 - `src/formula.rs` - parser and evaluator for curve formulas.
 - `src/plan.rs` - maps a configured device and its descriptor to the
   tables, curves, and knots of the BPF program, and the Rust reference of
   its rewrite.
+- `src/sysfs.rs` - HID devices in sysfs and their evdev nodes.
 - `src/usage.rs` - names and default axis kinds of HID axis usages.
 - `src/<module>/tests.rs` - unit tests of `src/<module>.rs`.
 - `tests/` - tests that only use the public API of the library.

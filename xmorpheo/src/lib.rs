@@ -7,6 +7,8 @@ pub mod confd;
 pub mod config;
 pub mod curve;
 pub mod descriptor;
+pub mod evdev;
 pub mod formula;
 pub mod plan;
+pub mod sysfs;
 pub mod usage;
