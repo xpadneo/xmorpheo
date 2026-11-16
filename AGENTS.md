@@ -130,6 +130,8 @@ Default section order:
   device knowledge and math into the Rust user-space tool.
 - Do not run privileged commands, such as loading BPF programs or writing to
   `/sys` or `/etc`, unless the human explicitly asks for that action.
+- Note user-visible changes in `CHANGELOG.md` under "Unreleased", and
+  move them under the version when releasing.
 - Keep the "AI Transparency" section of `README.md` current when the use
   of AI agents or the tested hardware changes.
 - Do not push, merge, close issues, resolve review threads, or post GitHub
@@ -171,6 +173,6 @@ relevant child guide.
 - `xmorpheo/` - the Rust crate with the library and the `xmorpheo` command
   line tool.
 
-The root keeps ownership of `README.md`, top-level project metadata,
-licensing, contribution policy, the Cargo workspace manifest, the
-`Makefile` for installing, and editor configuration.
+The root keeps ownership of `README.md`, `CHANGELOG.md`, top-level
+project metadata, licensing, contribution policy, the Cargo workspace
+manifest, the `Makefile` for installing, and editor configuration.

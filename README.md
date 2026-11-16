@@ -142,6 +142,7 @@ See [DESIGN.md](docs/DESIGN.md) for details.
 - [CLI.md](docs/CLI.md): the commands, and troubleshooting.
 - [PACKAGING.md](docs/PACKAGING.md): notes for distribution packages.
 - [DESIGN.md](docs/DESIGN.md): the architecture.
+- [CHANGELOG.md](CHANGELOG.md): the changes of each release.
 
 
 ## Requirements
