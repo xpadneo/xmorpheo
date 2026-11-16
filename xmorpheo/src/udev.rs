@@ -62,7 +62,8 @@ pub fn decide(config: Option<&Config>, sysname: &str) -> Decision {
 
 fn bind(sysname: &str) -> Result<(), Box<dyn Error>> {
     let result = attach(sysname);
-    let (Err(error), Some((_, _, _, hid_id))) = (&result, sysfs::parse_sysname(sysname)) else {
+    // run() logs the error itself.
+    let (Err(_), Some((_, _, _, hid_id))) = (&result, sysfs::parse_sysname(sysname)) else {
         return result;
     };
     // A program planned for the same descriptor stays, for example after
@@ -81,7 +82,7 @@ fn bind(sysname: &str) -> Result<(), Box<dyn Error>> {
     {
         log(
             libc::LOG_INFO,
-            &format!("{sysname}: kept the previous program, descriptor unchanged: {error}"),
+            &format!("{sysname}: kept the previous program, descriptor unchanged"),
         );
         return result;
     }
