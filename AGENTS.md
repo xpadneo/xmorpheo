@@ -163,6 +163,10 @@ relevant child guide.
 ## Child DOX Index
 
 - `.github/` - pull request template and future CI workflows.
+- `docs/` - user-facing documentation, the design document, the list of
+  ideas, and images.
+- `xmorpheo/` - the Rust crate with the library and the `xmorpheo` command
+  line tool.
 
 The root keeps ownership of `README.md`, top-level project metadata,
 licensing, contribution policy, the Cargo workspace manifest, the

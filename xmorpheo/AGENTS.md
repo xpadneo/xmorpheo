@@ -11,6 +11,7 @@ command line tool.
 ## Ownership
 
 - `src/descriptor.rs` - HID report descriptor parser.
+- `src/formula.rs` - parser and evaluator for curve formulas.
 - `src/<module>/tests.rs` - unit tests of `src/<module>.rs`.
 - `tests/` - tests that only use the public API of the library.
 - `tests/data/` - raw report descriptors of real devices, documented in
