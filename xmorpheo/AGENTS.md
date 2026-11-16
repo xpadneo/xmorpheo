@@ -32,6 +32,12 @@ command line tool.
 - `tests/` - tests that only use the public API of the library.
 - `tests/data/` - raw report descriptors of real devices, documented in
   `docs/descriptors/`.
+- `src/main.rs` - the command line tool, with clap subcommands.
+- `src/devices.rs` - the commands of the tool that work on connected
+  devices.
+- `src/plot.rs` - the CSV and gnuplot output of `xmorpheo curve`.
+- `src/udev.rs` - `xmorpheo udev`, run by the udev rule, logging to
+  syslog.
 
 
 ## Local Contracts
