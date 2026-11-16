@@ -21,6 +21,8 @@ command line tool.
   fixed point math.
 - `src/evdev.rs` - fuzz and flat of evdev axes through `EVIOCSABS`.
 - `src/formula.rs` - parser and evaluator for curve formulas.
+- `src/loader.rs` - loads, attaches, pins, and detaches the BPF program,
+  and checks what loading needs.
 - `src/plan.rs` - maps a configured device and its descriptor to the
   tables, curves, and knots of the BPF program, and the Rust reference of
   its rewrite.

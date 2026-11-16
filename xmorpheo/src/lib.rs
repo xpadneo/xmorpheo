@@ -9,6 +9,7 @@ pub mod curve;
 pub mod descriptor;
 pub mod evdev;
 pub mod formula;
+pub mod loader;
 pub mod plan;
 pub mod sysfs;
 pub mod usage;
