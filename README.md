@@ -35,8 +35,7 @@ Examples in [examples/](examples/) cover the main uses:
 - Two triggers combined into one axis:
   [xbox-combined-triggers.toml](examples/xbox-combined-triggers.toml).
 - Two pedals swapped:
-  [t300rs-swap-pedals.toml](examples/t300rs-swap-pedals.toml), not tested on
-  the device yet.
+  [t300rs-swap-pedals.toml](examples/t300rs-swap-pedals.toml).
 
 [docs/RECIPES.md](docs/RECIPES.md) has short configurations for inverting,
 swapping, combining, and pinning axes, deadzones, and curves.
@@ -185,7 +184,8 @@ I set the goals and make the design and architecture decisions, like
 keeping the report descriptor unchanged. I review every change, correct
 the agent where it is wrong, and take responsibility for the result. The
 tests on real hardware are my own: VKB Gladiator EVO sticks, and an Xbox
-Series X|S controller with xpadneo. Examples and recipes for other devices
+Series X|S controller with xpadneo, and a Thrustmaster T300 RS with
+hid-tmff2 in Euro Truck Simulator 2. Examples and recipes for other devices
 say so when they are not tested on the device yet. Privileged steps, like
 loading the BPF program into the kernel, are only run by me.
 

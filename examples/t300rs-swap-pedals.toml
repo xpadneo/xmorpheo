@@ -14,8 +14,8 @@
 # other drivers may name them differently, so check with
 # "xmorpheo template" first.
 #
-# Not tested on the device yet. Check with evtest that the pedals are
-# swapped after attaching.
+# Tested on a T300 RS in PC mode with Euro Truck Simulator 2 under Proton.
+# Check with evtest that the pedals are swapped after attaching.
 #
 # Each pedal reads the other one as its source. Both formulas read the
 # values the wheel sent, so the order of the entries does not matter.

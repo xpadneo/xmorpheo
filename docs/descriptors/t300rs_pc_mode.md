@@ -66,6 +66,6 @@ descriptor of the wheel itself. Games and their templates expect brake and
 clutch differently, see
 [hid-tmff2#233](https://github.com/Kimplul/hid-tmff2/issues/233).
 
-Not verified on the device: which field each physical pedal moves. The
-comments in hid-tmff2 and earlier notes agree on Rz for the brake and Y for
-the clutch.
+Measured with evtest on 2026-11-22, on a wheel in PC mode: the brake
+pedal moves Rz and the clutch pedal Y, as the comments in hid-tmff2 say.
+The pedals rest at the maximum of 1023 and go down to 0 when pressed.
