@@ -1,0 +1,26 @@
+// markdownlint configuration for markdownlint-cli2 and editor integrations.
+// Rules not listed here keep their defaults.
+{
+  // Two blank lines before a heading are the house style.
+  "MD012": { "maximum": 2 },
+
+  // Prose wraps well below this. Table rows cannot be wrapped.
+  "MD013": { "line_length": 120, "tables": false },
+
+  // The README shows the logo through <picture>, see docs/AGENTS.md.
+  "MD033": { "allowed_elements": ["picture", "source", "img"] },
+
+  // Device strings like HID_NAME carry significant leading and trailing
+  // spaces, and code spans show them as they are.
+  "MD038": false,
+
+  // The changelog repeats "Fixed" and "Changed" under every version.
+  "MD024": { "siblings_only": true },
+
+  // Shell continuation lines in code blocks are indented with a tab.
+  "MD010": { "code_blocks": false },
+
+  // Tables use "| a | b |" rows with a "|---|---|" delimiter row, which no
+  // single MD060 style accepts.
+  "MD060": false
+}
