@@ -142,6 +142,8 @@ Default section order:
 
 - Run `cargo fmt --check`, `cargo clippy --all-targets`, and `cargo test` for
   Rust changes.
+- Run `markdownlint-cli2` on changed Markdown files. It reads
+  `.markdownlint.jsonc`, and `.github/.markdownlint.jsonc` extends it.
 - Report any verification that could not be run, especially behavior that
   needs real hardware or a kernel with HID-BPF.
 
