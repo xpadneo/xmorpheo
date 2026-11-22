@@ -350,8 +350,8 @@ fn kind(centered: u8) -> AxisKind {
 
 impl Plan {
     /// Rewrites a report like the BPF program: all fields are read first,
-    /// then all outputs computed and written. Reports of other lengths or
-    /// report IDs stay untouched, and so does an output whose field or any
+    /// then all outputs computed and written. Reports shorter than the
+    /// descriptor says, or of other report IDs, stay untouched, and so does an output whose field or any
     /// source is outside its logical range.
     pub fn rewrite(&self, report: &mut [u8]) {
         let Some(&report_id) = report.first() else {
@@ -361,7 +361,7 @@ impl Plan {
             .fields
             .iter()
             .map(|f| {
-                let matches = f.report_len as usize == report.len()
+                let matches = report.len() >= f.report_len as usize
                     && (f.report_id == 0 || f.report_id == report_id);
                 matches
                     .then(|| bpf::get(f, report))

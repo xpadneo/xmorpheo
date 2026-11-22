@@ -259,11 +259,13 @@ fn c_rewrite_matches_rust_for_combined_triggers() {
     let desc = parse_descriptor(include_bytes!("data/xbox_series_xs_ble_xpadneo.rdesc")).unwrap();
     let plan = plan(&config.devices[0], &desc).unwrap();
     same_as_rust(&plan, 17, 1);
-    // A report of another length stays untouched.
-    let mut report = vec![1u8; 20];
+    // A shorter report stays untouched.
+    let mut report = vec![1u8; 16];
     let copy = report.clone();
     c_rewrite(&plan, &mut report);
     assert_eq!(report, copy);
+    // A longer report is rewritten like the HID core reads it.
+    same_as_rust(&plan, 20, 1);
 }
 
 #[test]
@@ -273,6 +275,8 @@ fn c_rewrite_swaps_the_t300rs_pedals_exactly() {
     let plan = plan(&config.devices[0], &desc).unwrap();
     let len = desc.input_report_len(7).unwrap() as usize;
     same_as_rust(&plan, len, 7);
+    // The wheel pads its reports to the 64 bytes of its endpoint.
+    same_as_rust(&plan, 64, 7);
     let brake = xm_field {
         bit_offset: 24,
         bit_size: 16,
@@ -288,13 +292,15 @@ fn c_rewrite_swaps_the_t300rs_pedals_exactly() {
         bit_size: 16,
         ..Default::default()
     };
-    for (b, c) in [
-        (0, 0),
-        (1023, 0),
-        (0, 1023),
-        (300, 700),
-        (1, 1022),
-        (512, 511),
+    for (b, c, len) in [
+        (0, 0, len),
+        (1023, 0, len),
+        (0, 1023, len),
+        (300, 700, len),
+        (1, 1022, len),
+        (512, 511, len),
+        (1023, 0, 64),
+        (300, 700, 64),
     ] {
         let mut report = vec![0u8; len];
         report[0] = 7;
@@ -309,7 +315,7 @@ fn c_rewrite_swaps_the_t300rs_pedals_exactly() {
                 get(&clutch, &report)
             ),
             (Some(c), Some(400), Some(b)),
-            "brake {b} clutch {c}"
+            "brake {b} clutch {c} len {len}"
         );
     }
 }

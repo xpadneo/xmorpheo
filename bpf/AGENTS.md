@@ -35,8 +35,10 @@ reports.
   the rewrite; a test in `xmorpheo/src/bpf.rs` checks the program size.
 - Keep the rewrite logic in `xmorpheo.h`, so the host build tests the same
   code against `Plan::rewrite` in `xmorpheo/src/plan.rs`.
-- Leave reports untouched that do not match the expected report ID or
-  length, and values outside the logical range.
+- Leave reports untouched that do not match the expected report ID or are
+  shorter than the expected length, and values outside the logical range.
+  Accept longer reports, like the HID core does, because devices may pad
+  their reports to the size of their endpoint.
 
 
 ## Work Guidance

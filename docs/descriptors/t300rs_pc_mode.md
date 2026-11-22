@@ -53,6 +53,10 @@ ID byte. Input report 7 has the axes:
 
 Reports 2 and 20 are vendor reports for force feedback.
 
+The wheel pads input report 7 to the 64 bytes of its interrupt endpoint,
+measured on 2026-11-22 in the debugfs events of the HID device: the 15
+bytes of the descriptor, then zeros. The HID core ignores the extra bytes.
+
 
 ## Pedal Mapping
 

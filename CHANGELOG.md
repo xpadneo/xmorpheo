@@ -10,6 +10,14 @@ configuration format may still change.
 
 ## [Unreleased]
 
+### Fixed
+
+- Reports longer than the report descriptor says were left untouched, so
+  nothing was remapped on devices that pad their reports, like the
+  Thrustmaster T300 RS, which sends 64 bytes for a report of 15 bytes.
+  Longer reports are now rewritten, like the HID core reads them; shorter
+  ones still stay untouched.
+
 
 ## [0.1.1] - 2026-11-16
 

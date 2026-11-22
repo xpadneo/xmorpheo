@@ -60,8 +60,11 @@ The program sees the raw reports of the device, but the descriptor in sysfs
 is the one after the `report_fixup` of the HID driver. If a driver changes
 the descriptor, the fields xmorpheo finds may not match the raw reports.
 As a guard, the loader stores the expected length of each input report, per
-report ID, and the program leaves a report untouched when its length
-differs.
+report ID, and the program leaves a report untouched when it is shorter.
+Longer reports are rewritten, because some devices pad every report to the
+size of their USB endpoint, like the Thrustmaster T300 RS with 64 byte
+reports where its descriptor declares 15 bytes, and the HID core ignores the extra
+bytes as well.
 
 Drivers that keep the report length but move fields would still mismatch.
 xpadneo, for example, splits the paddles out of the button field in its
@@ -100,7 +103,7 @@ transaction: it reads all fields of the report, computes each output as
 the sum of its terms from the values the device sent, then writes the
 outputs. So no output depends on the order of the fields, and a field can
 be the source of one output and the target of another. Fields of other
-report IDs and reports of other lengths are skipped, and an output keeps
+report IDs and reports shorter than expected are skipped, and an output keeps
 its value if its field or any source is outside its logical range. The
 computation only does integer math, with `span = max - min` and arithmetic shifts:
 

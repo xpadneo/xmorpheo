@@ -241,8 +241,12 @@ static __always_inline void xm_rewrite(void *ctx, __u32 size, __u8 report_id)
 		f = XM_FIELD(i);
 		if (!f || f->bit_size == 0 || f->bit_size > XM_MAX_BITS)
 			continue;
-		/* Leave reports alone that do not match the descriptor. */
-		if (f->report_len != size || (f->report_id && f->report_id != report_id))
+		/*
+		 * Leave reports alone that do not match the descriptor. Longer
+		 * reports are fine: devices may pad them to the size of their
+		 * endpoint, and the HID core ignores the extra bytes too.
+		 */
+		if (size < f->report_len || (f->report_id && f->report_id != report_id))
 			continue;
 		bytes = xm_field_bytes(f);
 		d = XM_WINDOW(f, bytes);
