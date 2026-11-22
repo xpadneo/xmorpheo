@@ -1,12 +1,11 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 
+# Input Curves for Linux Joysticks and Gamepads
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/logo-dark.png">
   <img alt="xmorpheo" src="docs/img/logo-light.png" width="600">
 </picture>
-
-
-# Input Curves for Linux Joysticks and Gamepads
 
 xmorpheo reshapes the axes of HID input devices in the kernel, using HID-BPF.
 It applies response curves and deadzones to the raw input reports before any
