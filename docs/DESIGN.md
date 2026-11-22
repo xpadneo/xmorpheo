@@ -19,7 +19,7 @@ now and keeps room for planned extensions, see [IDEAS.md](IDEAS.md).
 
 ## Where xmorpheo Hooks In
 
-```
+```text
 device ──► HID core ──► HID-BPF (xmorpheo) ──┬──► hidraw ──► Proton, Wine, SDL hidapi
                                               └──► HID driver (hid-generic, xpadneo) ──► evdev
 ```

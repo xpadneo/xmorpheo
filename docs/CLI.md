@@ -126,7 +126,7 @@ configured device appears.
 
 Without `--verbose`, `attach` prints one line per device:
 
-```
+```text
 VKB Gladiator EVO L (hid_id 9): attached, 3 fields, 104 knots, evdev: /dev/input/event11: set fuzz and flat of 8 of 8 axes
 ```
 
