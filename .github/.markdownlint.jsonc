@@ -1,0 +1,6 @@
+// The pull request template starts with instructions in comments and
+// second-level headings, because GitHub shows the pull request title above.
+{
+  "extends": "../.markdownlint.jsonc",
+  "MD041": false
+}
