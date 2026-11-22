@@ -42,11 +42,11 @@ for centered axes, `0..1` for unipolar axes. So a formula needs no outer
 of the travel on, and there is no separate function for a deadzone at the
 end stops, see [RECIPES.md](RECIPES.md#reach-full-deflection-early).
 
-Inner parts are not clamped. In `clamp((abs(x) - dz) / (1 - dz - e), 0, 1)
-* sign(x)`, the `clamp` keeps the deadzone at 0, which the outer range
-would not do for a centered axis. The terms of a formula in several
-variables are not clamped one by one either, only their sum, see
-[Several Variables](#several-variables).
+Inner parts are not clamped. In
+`clamp((abs(x) - dz) / (1 - dz - e), 0, 1) * sign(x)`, the `clamp` keeps
+the deadzone at 0, which the outer range would not do for a centered axis.
+The terms of a formula in several variables are not clamped one by one
+either, only their sum, see [Several Variables](#several-variables).
 
 The meaning of `normalize` and `deadzone` follows how ETS2 uses them. It is
 inferred, not documented by ETS2.
