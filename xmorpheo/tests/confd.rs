@@ -131,6 +131,21 @@ fn the_same_device_twice_takes_the_later_file() {
     );
 }
 
+/// Entries for different drivers of the same device are kept side by side.
+#[test]
+fn entries_for_other_drivers_stay() {
+    let d = Dirs::new("drivers");
+    d.write(3, "10-a.toml", &device(0x0200, 0.6));
+    let tmff2 = device(0x0200, 0.75).replace(
+        "product = 0x0200\n",
+        "product = 0x0200\ndriver = \"tmff2\"\n",
+    );
+    d.write(0, "90-b.toml", &tmff2);
+    let config = confd::read(&confd::scan(&d.dirs).unwrap()).unwrap();
+    assert_eq!(config.devices.len(), 2);
+    assert!(config.warnings.is_empty(), "{:?}", config.warnings);
+}
+
 #[test]
 fn other_files_are_ignored() {
     let d = Dirs::new("ignore");

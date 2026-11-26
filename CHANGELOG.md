@@ -13,6 +13,9 @@ configuration format may still change.
 ### Added
 
 - `xmorpheo list` shows the HID driver bound to each device.
+- `driver` limits a device entry to one HID driver, for drivers that
+  replace the report descriptor and so rename the axes. An entry with
+  `driver` wins over one without. `xmorpheo template` shows the driver.
 
 
 ## [0.1.2] - 2026-11-22

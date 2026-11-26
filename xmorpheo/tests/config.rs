@@ -124,11 +124,34 @@ fn find() {
          [[device]]\nvendor = 1\nproduct = 2\n",
     )
     .unwrap();
-    let name = |uniq| config.find(1, 2, uniq).map(|d| d.name.is_some());
+    let name = |uniq| config.find(1, 2, uniq, "").map(|d| d.name.is_some());
     assert_eq!(name("a"), Some(true));
     assert_eq!(name("b"), Some(false));
     assert_eq!(name(""), Some(false));
-    assert!(config.find(1, 3, "a").is_none());
+    assert!(config.find(1, 3, "a", "").is_none());
+}
+
+/// An entry that names the driver only matches with that driver, and wins
+/// over an entry without a driver, wherever that one is.
+#[test]
+fn find_by_driver() {
+    let config = Config::parse(
+        "[[device]]\nvendor = 1\nproduct = 2\nname = \"any\"\n\
+         [[device]]\nvendor = 1\nproduct = 2\ndriver = \"tmff2\"\nname = \"tmff2\"\n\
+         [[device]]\nvendor = 1\nproduct = 3\ndriver = \"tmff2\"\n",
+    )
+    .unwrap();
+    assert_eq!(config.devices[1].driver.as_deref(), Some("tmff2"));
+    let name = |product, driver| {
+        config
+            .find(1, product, "", driver)
+            .and_then(|d| d.name.as_deref())
+    };
+    assert_eq!(name(2, "tmff2"), Some("tmff2"));
+    assert_eq!(name(2, "hid-generic"), Some("any"));
+    assert_eq!(name(2, ""), Some("any"));
+    assert!(config.find(1, 3, "", "hid-generic").is_none());
+    assert!(config.find(1, 3, "", "tmff2").is_some());
 }
 
 #[test]

@@ -197,7 +197,10 @@ or masks the files of the same name with a lower priority, the rest is read
 in the order of the file names, and a later entry for the same device
 replaces an earlier one, see [CONFIG.md](CONFIG.md).
 Devices match by vendor ID and product ID, plus an optional HID unique ID
-(`HID_UNIQ`, usually the serial number) to tell identical devices apart.
+(`HID_UNIQ`, usually the serial number) to tell identical devices apart,
+and an optional HID driver, because a driver may replace the descriptor
+and so change the usages of the same fields. An entry with a driver wins
+over one without.
 Axes are selected by HID usage. Axes not listed stay untouched.
 
 - `usage` is a name, `X`, `Y`, `Z`, `Rx`, `Ry`, `Rz`, `Slider`, `Dial`,

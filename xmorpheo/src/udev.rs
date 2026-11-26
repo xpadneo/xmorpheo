@@ -42,8 +42,8 @@ pub enum Decision {
 }
 
 /// Decides from the device name alone whether the configuration may name
-/// the device, before anything else is read. The unique ID is checked
-/// later, when the device is opened.
+/// the device, before anything else is read. The unique ID and the driver
+/// are checked later, when the device is opened.
 pub fn decide(config: Option<&Config>, sysname: &str) -> Decision {
     let (Some(config), Some((_, vendor, product, _))) = (config, sysfs::parse_sysname(sysname))
     else {
@@ -116,7 +116,7 @@ fn attach(sysname: &str) -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
     let dev = HidDevice::open(&Path::new(sysfs::HID_DEVICES).join(sysname))?;
-    let Some(entry) = config.find(dev.vendor, dev.product, &dev.uniq) else {
+    let Some(entry) = config.find(dev.vendor, dev.product, &dev.uniq, &dev.driver) else {
         return Ok(());
     };
 

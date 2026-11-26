@@ -97,7 +97,7 @@ pub fn list(config: &Config) -> Result<(), Box<dyn Error>> {
     println!("hid_id  device               attached  driver       name  [configuration]");
     for dev in select(&[])? {
         let origin = config
-            .find(dev.vendor, dev.product, &dev.uniq)
+            .find(dev.vendor, dev.product, &dev.uniq, &dev.driver)
             .map(|d| match &d.origin {
                 Some(p) => format!(" [{}]", p.display()),
                 None => " [configured]".to_string(),
@@ -150,6 +150,12 @@ pub fn template(dev: &HidDevice, desc: &[u8]) -> Result<String, Box<dyn Error>> 
         out.push_str("# uniq = \"...\"        # only needed for identical devices\n");
     } else {
         out.push_str(&format!("# uniq = {}\n", quote(&dev.uniq)));
+    }
+    if !dev.driver.is_empty() {
+        out.push_str(&format!(
+            "# driver = {}  # only needed if the axes depend on the driver\n",
+            quote(&dev.driver)
+        ));
     }
     out.push_str("# [device.flat]       # evdev flat by axis, 0 by default\n");
     out.push_str("# ABS_X = 0\n");
@@ -266,7 +272,11 @@ pub fn attach(
     }
     let devices: Vec<_> = select(selectors)?
         .into_iter()
-        .filter(|d| !all || config.find(d.vendor, d.product, &d.uniq).is_some())
+        .filter(|d| {
+            !all || config
+                .find(d.vendor, d.product, &d.uniq, &d.driver)
+                .is_some()
+        })
         .collect();
     if devices.is_empty() {
         return Err("the configuration matches no connected device".into());
@@ -296,8 +306,8 @@ fn attach_one(
     verbose: bool,
 ) -> Result<(), Box<dyn Error>> {
     let entry = config
-        .find(dev.vendor, dev.product, &dev.uniq)
-        .ok_or("the configuration has no entry for this device")?;
+        .find(dev.vendor, dev.product, &dev.uniq, &dev.driver)
+        .ok_or("the configuration has no entry for this device and driver")?;
     let raw = dev.report_descriptor()?;
     let desc = descriptor::parse_descriptor(&raw)?;
     let plan = plan::plan(entry, &desc)?;

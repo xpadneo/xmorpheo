@@ -30,8 +30,8 @@ installed tool.
   `10-vkb.toml` before `50-xbox.toml`, and merged into one configuration.
 - `[constants]` and `tolerance` only apply to the file they are in.
 - If two files have an entry for the same device, by `vendor`, `product`,
-  and `uniq`, the entry of the later file replaces the earlier one as a
-  whole, with a warning.
+  `uniq`, and `driver`, the entry of the later file replaces the earlier
+  one as a whole, with a warning.
 
 `xmorpheo config` shows which files are active, overridden, or masked, and
 their contents. `xmorpheo list` shows the file each configured device comes
@@ -93,15 +93,22 @@ the curve needs, and a tolerance that fits.
 | `vendor` | required | USB or Bluetooth vendor ID, like `0x231d`. |
 | `product` | required | Product ID, like `0x0200`. |
 | `uniq` | any | The unique ID of the device (`HID_UNIQ`, usually the serial number), to tell identical devices apart. |
+| `driver` | any | The HID driver that must be bound to the device, like `hid-generic`. |
 | `name` | none | A name for messages. |
 | `evdev` | none | `"keep"` leaves the evdev fuzz and flat as the driver set them. |
 | `[device.fuzz]` | `0` | The evdev fuzz by evdev axis, see below. |
 | `[device.flat]` | `0` | The evdev flat by evdev axis, see below. |
 | `[[device.axis]]` | none | One entry per axis to rewrite. |
 
-`xmorpheo list` shows vendor, product, and unique ID of the connected
-devices. The first entry that matches a device wins. An entry without
-`uniq` matches every device with its vendor and product ID.
+`xmorpheo list` shows vendor, product, unique ID, and driver of the
+connected devices. An entry without `uniq` or `driver` matches every
+device with its vendor and product ID. An entry with `driver` wins over
+one without, otherwise the first entry that matches a device wins.
+
+A driver may replace the report descriptor of a device, so the same pedal
+or stick can have another usage under another driver. `driver` limits an
+entry to the driver its usages were written for. Under any other driver,
+the entry does not apply.
 
 
 ## evdev Fuzz and Flat

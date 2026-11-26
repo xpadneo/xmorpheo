@@ -41,7 +41,9 @@ the contents of the active files in the order they are read, like
 
 Prints a template for the named devices, or for all connected devices with
 axes. Each axis has a comment with its bit size, position, logical range,
-and default kind. Uncomment the axes to rewrite and set their curves.
+and default kind. Uncomment the axes to rewrite and set their curves, and
+`driver` if the usages depend on the driver, see
+[CONFIG.md](CONFIG.md#devices).
 
 ```sh
 xmorpheo template 231d:0200 | sudo tee /etc/xmorpheo/conf.d/50-vkb.toml

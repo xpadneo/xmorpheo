@@ -26,6 +26,7 @@ fn vkb_template_parses() {
     }
     assert!(!text.contains("0001:0039"));
     assert!(!text.contains("0000:0000"));
+    assert!(text.contains("# driver = \"hid-generic\""));
     // Commented out, the template is a device without axes.
     let config = Config::parse(&text).unwrap();
     assert_eq!(config.devices[0].product, 0x0200);

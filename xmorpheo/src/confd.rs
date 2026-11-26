@@ -190,10 +190,13 @@ pub fn read(entries: &[Entry]) -> Result<Config, Error> {
 }
 
 /// Adds a device entry to a merged configuration. An entry for the same
-/// device, by vendor, product, and unique ID, from an earlier file is
-/// replaced as a whole, with a warning.
+/// device, by vendor, product, unique ID, and driver, from an earlier file
+/// is replaced as a whole, with a warning.
 pub fn merge_device(merged: &mut Config, dev: Device) {
-    let same = |d: &Device| (d.vendor, d.product, &d.uniq) == (dev.vendor, dev.product, &dev.uniq);
+    let same = |d: &Device| {
+        (d.vendor, d.product, &d.uniq, &d.driver)
+            == (dev.vendor, dev.product, &dev.uniq, &dev.driver)
+    };
     if let Some(old) = merged.devices.iter_mut().find(|d| same(d)) {
         let origin = |d: &Device| {
             d.origin

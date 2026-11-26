@@ -3,8 +3,8 @@
 //! The configuration file.
 //!
 //! The configuration is TOML. It names devices by vendor and product ID,
-//! plus an optional HID unique ID, and lists the axes to rewrite with
-//! their curve formulas:
+//! plus an optional HID unique ID and HID driver, and lists the axes to
+//! rewrite with their curve formulas:
 //!
 //! ```toml
 //! tolerance = 0.5         # optional, in least significant bits
@@ -16,6 +16,7 @@
 //! name = "VKB Gladiator EVO R"
 //! vendor = 0x231d
 //! product = 0x0200
+//! driver = "hid-generic"  # optional, only with this driver bound
 //!
 //! [device.flat]           # optional, evdev flat by evdev axis, default 0
 //! ABS_X = 128
@@ -57,6 +58,9 @@ pub struct Device {
     pub product: u16,
     /// The HID unique ID (`HID_UNIQ`), to tell identical devices apart.
     pub uniq: Option<String>,
+    /// The HID driver that must be bound, like `hid-generic`, because the
+    /// report descriptor may depend on it.
+    pub driver: Option<String>,
     /// The evdev fuzz of axes by evdev name, like `ABS_X`. Axes not listed
     /// get 0.
     pub fuzz: BTreeMap<String, u32>,
@@ -201,6 +205,7 @@ struct RawDevice {
     vendor: u16,
     product: u16,
     uniq: Option<String>,
+    driver: Option<String>,
     evdev: Option<String>,
     #[serde(default)]
     fuzz: BTreeMap<String, u32>,
@@ -374,6 +379,7 @@ impl Config {
                 vendor: dev.vendor,
                 product: dev.product,
                 uniq: dev.uniq,
+                driver: dev.driver,
                 keep_evdev,
                 fuzz: dev.fuzz,
                 flat: dev.flat,
@@ -384,13 +390,21 @@ impl Config {
         Ok(Self { devices, warnings })
     }
 
-    /// The first device entry that matches a device. An entry without a
-    /// unique ID matches every device with its vendor and product ID.
-    pub fn find(&self, vendor: u16, product: u16, uniq: &str) -> Option<&Device> {
-        self.devices.iter().find(|d| {
+    /// The device entry that matches a device with its bound HID driver.
+    /// An entry without a unique ID or driver matches every device with
+    /// its vendor and product ID. An entry that names the driver wins over
+    /// one that does not, otherwise the first entry that matches wins.
+    pub fn find(&self, vendor: u16, product: u16, uniq: &str, driver: &str) -> Option<&Device> {
+        let mut matching = self.devices.iter().filter(|d| {
             d.vendor == vendor
                 && d.product == product
                 && d.uniq.as_deref().is_none_or(|u| u == uniq)
-        })
+                && d.driver.as_deref().is_none_or(|v| v == driver)
+        });
+        let first = matching.next()?;
+        if first.driver.is_some() {
+            return Some(first);
+        }
+        Some(matching.find(|d| d.driver.is_some()).unwrap_or(first))
     }
 }
