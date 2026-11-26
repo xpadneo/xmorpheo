@@ -9,7 +9,7 @@ need root.
 
 | Command | Root | Purpose |
 |---|---|---|
-| `xmorpheo list [-c PATH]` | no | HID devices, whether a program is attached, and the file that configures them |
+| `xmorpheo list [-c PATH]` | no | HID devices, whether a program is attached, their driver, and the file that configures them |
 | `xmorpheo config [-c PATH]` | no | the configuration files, which are active, overridden, or masked, and their contents |
 | `xmorpheo template [DEVICE...]` | no | a configuration template with all axes commented out |
 | `xmorpheo descriptor PATH [--all]` | no | the input fields of a report descriptor |
@@ -24,8 +24,9 @@ directories, see [CONFIG.md](CONFIG.md#files).
 
 ## list
 
-Without root, the attached column shows `?`, because `/sys/fs/bpf` is only
-readable by root.
+The driver column shows the HID driver bound to the device, like
+`hid-generic`, or `-` while none is bound. Without root, the attached
+column shows `?`, because `/sys/fs/bpf` is only readable by root.
 
 
 ## config

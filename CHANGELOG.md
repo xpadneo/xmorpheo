@@ -10,6 +10,10 @@ configuration format may still change.
 
 ## [Unreleased]
 
+### Added
+
+- `xmorpheo list` shows the HID driver bound to each device.
+
 
 ## [0.1.2] - 2026-11-22
 

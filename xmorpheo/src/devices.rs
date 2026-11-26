@@ -94,7 +94,7 @@ fn yes_no(v: Option<bool>) -> &'static str {
 
 /// `xmorpheo list`
 pub fn list(config: &Config) -> Result<(), Box<dyn Error>> {
-    println!("hid_id  device               attached  name  [configuration]");
+    println!("hid_id  device               attached  driver       name  [configuration]");
     for dev in select(&[])? {
         let origin = config
             .find(dev.vendor, dev.product, &dev.uniq)
@@ -107,8 +107,13 @@ pub fn list(config: &Config) -> Result<(), Box<dyn Error>> {
         if !dev.uniq.is_empty() {
             name = format!("{name} ({})", dev.uniq);
         }
+        let driver = if dev.driver.is_empty() {
+            "-"
+        } else {
+            &dev.driver
+        };
         println!(
-            "{:>6}  {:<19}  {:<8}  {name}{origin}",
+            "{:>6}  {:<19}  {:<8}  {driver:<11}  {name}{origin}",
             dev.hid_id,
             dev.sysname,
             yes_no(loader::is_attached(dev.hid_id)),
