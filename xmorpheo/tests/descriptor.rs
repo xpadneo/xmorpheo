@@ -102,6 +102,40 @@ fn vkb_axes() {
     );
 }
 
+/// The pedals of the Thrustmaster T300 RS lie at the same places with
+/// hid-tmff2 and hid-generic, but under other usages, see
+/// `docs/descriptors/t300rs_pc_mode.md`.
+#[test]
+fn t300rs_pedals_by_driver() {
+    let pedals = |desc: &[u8]| -> Vec<_> {
+        parse(desc)
+            .unwrap()
+            .iter()
+            .filter(|f| f.report_id == 7 && f.bit_size == 16)
+            .map(|f| (f.usage.id, f.bit_offset, f.logical_max))
+            .collect()
+    };
+    // Wheel, then brake, gas, and clutch.
+    assert_eq!(
+        pedals(include_bytes!("data/t300rs_pc_mode.rdesc")),
+        [
+            (0x30, 8, 65535),
+            (0x35, 24, 1023),
+            (0x32, 40, 1023),
+            (0x31, 56, 1023)
+        ]
+    );
+    assert_eq!(
+        pedals(include_bytes!("data/t300rs_pc_mode_hid_generic.rdesc")),
+        [
+            (0x30, 8, 65535),
+            (0x31, 24, 1023),
+            (0x35, 40, 1023),
+            (0x36, 56, 1023)
+        ]
+    );
+}
+
 #[test]
 fn xb1s_sticks_and_triggers() {
     let fields = parse(XB1S).unwrap();
