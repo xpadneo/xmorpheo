@@ -123,6 +123,10 @@ fn attach(sysname: &str) -> Result<(), Box<dyn Error>> {
     }
     let dev = HidDevice::open(&Path::new(sysfs::HID_DEVICES).join(sysname))?;
     let Some(entry) = config.find(dev.vendor, dev.product, &dev.uniq, &dev.driver) else {
+        // The configuration names the vendor and product, but no entry
+        // matches this device with this driver. A program planned for
+        // another driver or device entry must not stay.
+        detach_previous(sysname, dev.hid_id);
         return Ok(());
     };
 

@@ -278,8 +278,9 @@ stays if the report descriptor is the same as the one it was planned for,
 which attach keeps in `/run/xmorpheo/state/<hid_id>.rdesc` next to the
 pin. If the descriptor differs or is not known, the old program is
 detached, because its fields may no longer match. Either way, the error
-goes to the journal. Attaching and
-detaching hold a lock on the pin directory, so the rule and a manual
+goes to the journal. The old program is also detached when no entry
+matches the device with its new driver anymore. Attaching and detaching
+hold a lock on the pin directory, so the rule and a manual
 `xmorpheo attach` never attach to a device twice. When the
 device disappears, the kernel detaches the program, and `xmorpheo udev
 remove` removes the stale pin. The tool can also attach to all present

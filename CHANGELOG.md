@@ -10,6 +10,12 @@ configuration format may still change.
 
 ## [Unreleased]
 
+### Changed
+
+- When a driver binds to a device that the configuration names, but no
+  entry matches the device with that driver, the udev rule detaches a
+  program that is still attached, instead of keeping it.
+
 ### Added
 
 - `xmorpheo list` shows the HID driver bound to each device.
