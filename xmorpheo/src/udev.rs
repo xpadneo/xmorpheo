@@ -86,6 +86,13 @@ fn bind(sysname: &str) -> Result<(), Box<dyn Error>> {
         );
         return result;
     }
+    detach_previous(sysname, hid_id);
+    result
+}
+
+/// Detaches the program of a device, if one is attached. Errors are only
+/// logged.
+fn detach_previous(sysname: &str, hid_id: u32) {
     match loader::detach(hid_id) {
         Ok(true) => log(
             libc::LOG_INFO,
@@ -97,7 +104,6 @@ fn bind(sysname: &str) -> Result<(), Box<dyn Error>> {
             &format!("{sysname}: detaching the previous program: {e}"),
         ),
     }
-    result
 }
 
 /// Whether the previous program of a device stays after a failed bind:
