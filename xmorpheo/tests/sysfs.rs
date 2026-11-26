@@ -71,6 +71,8 @@ fn devices() {
     assert_eq!(evo.name, "VKB-Sim © Alex Oz 2021  VKBsim Gladiator EVO  R");
     assert_eq!((evo.vendor, evo.product, evo.hid_id), (0x231d, 0x0200, 10));
     assert_eq!(evo.uniq, "");
+    assert_eq!(evo.driver, "hid-generic");
+    assert_eq!(xbox.driver, "");
     assert_eq!(evo.report_descriptor().unwrap(), [0x05, 0x01]);
     assert_eq!(
         evo.event_nodes().unwrap(),

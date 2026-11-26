@@ -27,6 +27,9 @@ pub struct HidDevice {
     pub name: String,
     /// `HID_UNIQ` from the uevent, usually the serial number. May be empty.
     pub uniq: String,
+    /// `DRIVER` from the uevent, the HID driver bound to the device, like
+    /// `hid-generic`. Empty while no driver is bound.
+    pub driver: String,
 }
 
 /// Splits a device directory name into bus, vendor, product, and `hid_id`.
@@ -76,6 +79,9 @@ impl HidDevice {
                 .trim()
                 .to_string(),
             uniq: uevent_value(&uevent, "HID_UNIQ")
+                .unwrap_or_default()
+                .to_string(),
+            driver: uevent_value(&uevent, "DRIVER")
                 .unwrap_or_default()
                 .to_string(),
         })

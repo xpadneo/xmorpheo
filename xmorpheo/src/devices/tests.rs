@@ -14,6 +14,7 @@ fn vkb_template_parses() {
         hid_id: 10,
         name: "VKB-Sim © Alex Oz 2021  VKBsim Gladiator EVO  R".into(),
         uniq: String::new(),
+        driver: "hid-generic".into(),
     };
     let text = template(
         &dev,
