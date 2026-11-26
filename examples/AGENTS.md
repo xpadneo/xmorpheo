@@ -17,7 +17,7 @@ into their own configuration.
 - `xbox-combined-triggers.toml` - the same, with both triggers combined
   into one rotation axis.
 - `t300rs-swap-pedals.toml` - swaps brake and clutch of a Thrustmaster
-  T300 RS with hid-tmff2.
+  T300 RS, only with the tmff2 driver of hid-tmff2 bound.
 
 
 ## Local Contracts

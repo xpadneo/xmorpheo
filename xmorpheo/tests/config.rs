@@ -359,6 +359,8 @@ fn errors() {
 #[test]
 fn t300rs_swap_pedals_example() {
     let config = Config::parse(include_str!("../../examples/t300rs-swap-pedals.toml")).unwrap();
+    // Under hid-generic, the pedals have other usages and need no swap.
+    assert_eq!(config.devices[0].driver.as_deref(), Some("tmff2"));
     let axes = &config.devices[0].axes;
     let swaps: Vec<_> = axes
         .iter()

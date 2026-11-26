@@ -12,6 +12,9 @@ configuration format may still change.
 
 ### Changed
 
+- The Thrustmaster T300 RS example only applies with hid-tmff2 bound.
+  Under hid-generic, the wheel names its pedals differently, and the swap
+  hit brake and gas instead of brake and clutch.
 - When a driver binds to a device that the configuration names, but no
   entry matches the device with that driver, the udev rule detaches a
   program that is still attached, instead of keeping it.
