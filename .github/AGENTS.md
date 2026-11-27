@@ -10,7 +10,8 @@ This subtree owns repository automation and GitHub-facing project metadata.
 ## Ownership
 
 - Pull request templates and, later, issue templates.
-- GitHub Actions workflows.
+- GitHub Actions workflows: `workflows/pages.yml` builds and deploys the
+  website, see `site/AGENTS.md`.
 
 
 ## Local Contracts

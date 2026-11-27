@@ -51,12 +51,18 @@ documentation under `/docs/`, rendered with mdBook.
 - The landing page has a title, a description, a canonical URL, and Open
   Graph tags with the logo. The sitemap lists the landing page and the
   pages of the book, without the copies and helper pages of mdBook.
-- Pin the exact mdBook version.
+- `MDBOOK_VERSION` in `build.py` pins the exact mdBook version. The build
+  fails with another one, and the workflow installs that one.
+- `.github/workflows/pages.yml` deploys only for a published release and
+  for a manual run, with the tag as input. Pull requests that touch the
+  website, the documentation, or the build only build it, with the
+  documentation of the pull request.
 
 
 ## Work Guidance
 
-- Use only the Python standard library in `build.py`.
+- Use only the Python standard library in `build.py`, Python 3.12 or
+  newer.
 - Take the colors of the landing page from the logo, in a light and a dark
   scheme.
 

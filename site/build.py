@@ -33,6 +33,9 @@ SITE = ROOT / "site"
 TARGET = ROOT / "target"
 REPO = "https://github.com/xpadneo/xmorpheo"
 SITE_URL = "https://xpadneo.github.io/xmorpheo/"
+# The exact version of mdBook, the workflow installs it with
+# "build.py --mdbook-version".
+MDBOOK_VERSION = "0.5.4"
 # Pages of mdBook that are not for search engines. docs/index.html is a
 # copy of the first chapter.
 NOT_IN_SITEMAP = {"docs/404.html", "docs/index.html", "docs/print.html", "docs/toc.html"}
@@ -265,6 +268,16 @@ def summary(content, chapters, descriptors):
     return "\n".join(lines)
 
 
+def check_mdbook(mdbook):
+    try:
+        result = subprocess.run([mdbook, "--version"], capture_output=True, text=True)
+    except FileNotFoundError:
+        fail(f"{mdbook} not found, install mdBook {MDBOOK_VERSION}")
+    version = result.stdout.split()[-1].removeprefix("v") if result.stdout else ""
+    if version != MDBOOK_VERSION:
+        fail(f"{mdbook} is version {version or 'unknown'}, the site needs {MDBOOK_VERSION}")
+
+
 def build_book(revision, work, out, mdbook):
     content = work / "content"
     revision.extract(content, ["docs", CHANGELOG])
@@ -392,7 +405,17 @@ def main():
     )
     parser.add_argument("--out", default="target/site", help="output directory")
     parser.add_argument("--mdbook", default="mdbook", help="the mdbook command")
+    parser.add_argument(
+        "--mdbook-version",
+        action="store_true",
+        help="print the needed version of mdBook and exit",
+    )
     args = parser.parse_args()
+    if args.mdbook_version:
+        print(MDBOOK_VERSION)
+        return
+
+    check_mdbook(args.mdbook)
 
     revision = Revision(args.tag)
     out = below_target(ROOT / args.out)
