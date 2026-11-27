@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!--
+  The landing page of the website. build.py writes it to index.html and
+  puts in @VERSION_LINE@ and @REF@, see site/AGENTS.md.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>xmorpheo: response curves and deadzones for joysticks, gamepads, and wheels on Linux</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="./">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="img/logo-dark.png">
+      <img alt="xmorpheo" src="img/logo-light.png" width="240" height="80">
+    </picture>
+  </a>
+  <nav aria-label="Site">
+    <a href="docs/">Documentation</a>
+    <a href="docs/RECIPES.html">Recipes</a>
+    <a href="https://github.com/xpadneo/xmorpheo">GitHub</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Response curves and deadzones for joysticks, gamepads, and wheels on Linux</h1>
+    <p class="lead">
+      xmorpheo reshapes the axes of HID input devices in the kernel, with
+      HID-BPF. Curves, deadzones, inverted, swapped, and combined axes apply
+      to the raw input reports, before any driver or game reads them. So
+      they work in every game and application, native or in Proton and
+      Wine, without support from the game.
+    </p>
+    <p class="actions">
+      <a class="button primary" href="docs/INSTALL.html">Install xmorpheo</a>
+      <a class="button" href="docs/RECIPES.html">Browse the recipes</a>
+    </p>
+    <p class="release">@VERSION_LINE@</p>
+  </div>
+  <figure class="plot">
+    <svg viewBox="-12 -12 224 224" role="img" aria-labelledby="plot-title">
+      <title id="plot-title">An expo curve with k = 0.6 next to the unchanged straight line: flatter around the center, full deflection at the ends</title>
+      <g class="grid">
+        <path d="M10 55H190M10 145H190M55 10V190M145 10V190"/>
+      </g>
+      <g class="axes">
+        <path d="M10 100H190M100 10V190"/>
+      </g>
+      <path class="identity" d="M10 190L190 10"/>
+      <path class="curve" d="M10.0 190.0 L14.5 180.5 L19.0 171.8 L23.5 163.8 L28.0 156.4 L32.5 149.8 L37.0 143.7 L41.5 138.2 L46.0 133.3 L50.5 128.8 L55.0 124.8 L59.5 121.1 L64.0 117.9 L68.5 114.9 L73.0 112.3 L77.5 109.8 L82.0 107.6 L86.5 105.6 L91.0 103.7 L95.5 101.8 L100.0 100.0 L104.5 98.2 L109.0 96.3 L113.5 94.4 L118.0 92.4 L122.5 90.2 L127.0 87.7 L131.5 85.1 L136.0 82.1 L140.5 78.9 L145.0 75.2 L149.5 71.2 L154.0 66.7 L158.5 61.8 L163.0 56.3 L167.5 50.2 L172.0 43.6 L176.5 36.2 L181.0 28.2 L185.5 19.5 L190.0 10.0"/>
+      <text x="186" y="114" text-anchor="end">stick</text>
+      <text x="106" y="20">game</text>
+    </svg>
+    <figcaption>
+      <code>curve = "(1 - k) * x + k * pow(x, 3)"</code>
+      with <code>k = 0.6</code>: finer control around the center, full
+      deflection at the ends.
+    </figcaption>
+  </figure>
+</section>
+
+<section class="path" aria-labelledby="path-title">
+  <h2 id="path-title">One place for every game</h2>
+  <ol class="flow">
+    <li><strong>Your device</strong> sends HID reports.</li>
+    <li><strong>xmorpheo</strong> rewrites the configured axes in the kernel.</li>
+    <li><strong>Everything that reads the device</strong> gets the new values:
+      evdev and SDL, drivers like
+      <a href="https://github.com/atar-axis/xpadneo">xpadneo</a>, and
+      games in Proton or Wine that read <code>hidraw</code>.</li>
+  </ol>
+  <p>
+    The device keeps its vendor and product ID, so games that bind their
+    controls to a specific device still recognize it. There is no virtual
+    device and no daemon: once attached, the curves stay in the kernel until
+    you detach them, and udev attaches them again on every replug.
+  </p>
+</section>
+
+<section class="uses" aria-labelledby="uses-title">
+  <h2 id="uses-title">What it does</h2>
+  <dl>
+    <div>
+      <dt><a href="docs/RECIPES.html#finer-control-around-the-center">Response curves and expo</a></dt>
+      <dd>Finer aiming with a flight stick or gamepad stick, with any
+        formula, like the expo curves of RC transmitters.
+        <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/examples/vkb-gladiator-evo.toml">Flight stick example</a>,
+        <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/examples/xbox-wireless-controller.toml">gamepad example</a>.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#add-a-deadzone">Deadzones</a></dt>
+      <dd>Around the center of a worn stick, or at the start of a pedal,
+        with full deflection still reachable.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#reach-full-deflection-early">Full deflection before the end stop</a></dt>
+      <dd>For sticks and pedals that never quite reach their maximum.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#invert-an-axis">Inverted axes</a></dt>
+      <dd>For games that offer no invert option, or apply it to every
+        device at once.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#swap-two-axes">Swapped axes and wheel pedals</a></dt>
+      <dd>When a game mixes up brake and clutch, or for a left-handed
+        gamepad layout.
+        <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/examples/t300rs-swap-pedals.toml">Wheel pedal example</a>.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#combine-two-pedals-or-triggers-on-one-axis">Combined axes</a></dt>
+      <dd>Gas and brake, or two triggers, on one axis for older games.
+        <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/examples/xbox-combined-triggers.toml">Trigger example</a>.</dd>
+    </div>
+    <div>
+      <dt><a href="docs/RECIPES.html#pin-an-axis-at-rest">Pinned axes</a></dt>
+      <dd>Hold an axis still, like a twist that should not yaw.</dd>
+    </div>
+  </dl>
+  <p>
+    If you know curve tools like Joystick Gremlin from Windows: xmorpheo
+    covers the axes on Linux, with curves and deadzones per axis, in a
+    plain configuration file. Buttons, layers, and macros are
+    <a href="docs/IDEAS.html">not done yet</a>.
+  </p>
+</section>
+
+<section class="tested" aria-labelledby="tested-title">
+  <h2 id="tested-title">Tested on real hardware</h2>
+  <p>
+    xmorpheo is not tied to a device or a game. It reads the report
+    descriptor of any HID device and finds its axes. These devices are
+    tested so far:
+  </p>
+  <ul>
+    <li>VKB Gladiator EVO L and R, over USB.</li>
+    <li>Xbox Wireless Controller (Series X|S) over Bluetooth LE with
+      xpadneo.</li>
+    <li>Thrustmaster T300 RS with hid-tmff2.</li>
+  </ul>
+  <p>
+    xmorpheo is young: it works on these devices, but you may run into
+    bugs, and the configuration format may still change before 1.0.
+    <a href="https://github.com/xpadneo/xmorpheo/issues">Feedback and bug
+    reports</a> are very welcome.
+  </p>
+</section>
+
+<section class="start" aria-labelledby="start-title">
+  <h2 id="start-title">Getting started</h2>
+  <p>
+    You need Linux 6.11 or newer with <code>CONFIG_HID_BPF</code> and BTF,
+    and for building Rust, clang, bpftool, and the libelf and zlib
+    development files.
+  </p>
+<pre><code>make
+sudo make install
+xmorpheo list
+xmorpheo template 231d:0200 | sudo tee /etc/xmorpheo/conf.d/50-mystick.toml
+xmorpheo attach --all --dry-run
+sudo xmorpheo attach --all</code></pre>
+  <p>
+    Put the <code>VENDOR:PRODUCT</code> of your device from
+    <code>xmorpheo list</code> in place of <code>231d:0200</code>, and give
+    the axes in the template a curve.
+    <a href="docs/INSTALL.html">Installing</a> and
+    <a href="docs/CONFIG.html">the configuration</a> explain each step,
+    <a href="docs/FORMULAS.html">Formulas</a> the curves.
+  </p>
+</section>
+
+<section class="caution" aria-labelledby="caution-title">
+  <h2 id="caution-title">Force feedback devices</h2>
+  <p>
+    On force feedback devices such as wheels and joysticks, a wrong
+    configuration, like an inverted or swapped axis, can make the game
+    drive the device with full force against its stops. Depending on the
+    device, this can damage the hardware or hurt hands, fingers, or thumbs.
+    Test new configurations with the force feedback of the game turned
+    down or off, and keep your hands clear. You use xmorpheo at your own
+    risk, it comes without any warranty, see
+    <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/README.md#safety-and-liability">Safety and Liability</a>.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    xmorpheo is free software: the BPF program and the tool under the GPL,
+    the examples under CC0, see
+    <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/LICENSE.md">the licenses</a>.
+    It is developed with the help of an AI coding agent, see
+    <a href="https://github.com/xpadneo/xmorpheo/blob/@REF@/README.md#ai-transparency">AI Transparency</a>.
+  </p>
+  <p>
+    <a href="docs/CHANGELOG.html">Changelog</a>
+    <a href="https://github.com/xpadneo/xmorpheo">Source code</a>
+    <a href="https://github.com/xpadneo/xmorpheo/issues">Issues</a>
+  </p>
+</footer>
+
+</body>
+</html>

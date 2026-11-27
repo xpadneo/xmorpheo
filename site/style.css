@@ -1,0 +1,313 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+
+/* The landing page. The colors come from the logo: the indigo ink of the
+ * light variant, the violet of the dark one, and the teal of the curve. */
+
+:root {
+    --paper: #f6f5fb;
+    --ink: #21164a;
+    --muted: #4f4775;
+    --accent: #007d70;
+    --curve: #00a896;
+    --line: #d9d5ea;
+    --panel: #ecebf6;
+    --caution: #8a3b00;
+    --measure: 68ch;
+    --sans: system-ui, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "DejaVu Sans Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --paper: #140e2e;
+        --ink: #ece9fb;
+        --muted: #b4acd9;
+        --accent: #3ee6cc;
+        --curve: #00f0d0;
+        --line: #342a62;
+        --panel: #1d1540;
+        --caution: #ffb27a;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--paper);
+    color: var(--ink);
+    font: 1.0625rem/1.6 var(--sans);
+}
+
+body {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 1.5rem;
+}
+
+a {
+    color: var(--accent);
+    text-underline-offset: 0.15em;
+}
+
+a:hover {
+    text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+    outline: 3px solid var(--curve);
+    outline-offset: 3px;
+}
+
+code,
+pre {
+    font-family: var(--mono);
+    font-size: 0.9em;
+}
+
+h1,
+h2 {
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+h1 {
+    font-size: clamp(2rem, 4.5vw, 3.1rem);
+    font-weight: 750;
+    margin: 0 0 1.25rem;
+}
+
+h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+}
+
+p,
+li,
+dd {
+    max-width: var(--measure);
+}
+
+/* Header */
+
+.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 0;
+}
+
+.brand img {
+    display: block;
+    height: auto;
+    width: 240px;
+}
+
+.top nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.top nav a {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.top nav a:hover {
+    color: var(--accent);
+}
+
+/* The hero: the claim on the left, the curve on the right. */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 3rem;
+    padding: 3rem 0 4rem;
+}
+
+.lead {
+    color: var(--muted);
+    font-size: 1.2rem;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 2rem 0 1rem;
+}
+
+.button {
+    border: 2px solid var(--ink);
+    border-radius: 0.4rem;
+    color: var(--ink);
+    font-weight: 650;
+    padding: 0.6rem 1.1rem;
+    text-decoration: none;
+}
+
+.button.primary {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.button:hover {
+    border-color: var(--accent);
+}
+
+.button.primary:hover {
+    background: var(--accent);
+}
+
+.release {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.plot {
+    margin: 0;
+}
+
+.plot svg {
+    display: block;
+    width: 100%;
+    max-width: 26rem;
+    margin: 0 auto;
+}
+
+.plot .grid {
+    stroke: var(--line);
+    stroke-width: 0.75;
+}
+
+.plot .axes {
+    stroke: var(--muted);
+    stroke-width: 1;
+}
+
+.plot .identity {
+    fill: none;
+    stroke: var(--muted);
+    stroke-dasharray: 3 4;
+    stroke-width: 1.25;
+}
+
+.plot .curve {
+    fill: none;
+    stroke: var(--curve);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 4;
+}
+
+.plot text {
+    fill: var(--muted);
+    font: 8px var(--sans);
+}
+
+.plot figcaption {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 1rem auto 0;
+    max-width: 26rem;
+}
+
+.plot figcaption code:first-child {
+    color: var(--ink);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+/* Sections */
+
+main > section:not(.hero) {
+    border-top: 1px solid var(--line);
+    padding: 3rem 0;
+}
+
+.flow {
+    padding-left: 1.25rem;
+}
+
+.flow li {
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+}
+
+.flow li::marker {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.uses dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1.75rem 2.5rem;
+    margin: 0 0 2rem;
+}
+
+.uses dt {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.uses dt a {
+    color: var(--ink);
+    text-decoration-color: var(--curve);
+    text-decoration-thickness: 2px;
+}
+
+.uses dt a:hover {
+    color: var(--accent);
+}
+
+.uses dd {
+    color: var(--muted);
+    margin: 0;
+}
+
+.start pre {
+    background: var(--panel);
+    border-radius: 0.4rem;
+    max-width: var(--measure);
+    overflow-x: auto;
+    padding: 1rem 1.25rem;
+}
+
+.caution h2 {
+    color: var(--caution);
+}
+
+.caution p {
+    border-left: 4px solid var(--caution);
+    padding-left: 1rem;
+}
+
+footer {
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding: 2rem 0 3rem;
+}
+
+footer p:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+@media (max-width: 52rem) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2rem;
+        padding-top: 1.5rem;
+    }
+}

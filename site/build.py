@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Builds the website into target/site: the documentation under docs/ with
-# mdBook. The Markdown files stay the single source: they are copied into
-# a generated book below target/ at build time.
+# Builds the website into target/site: the landing page from index.html.in,
+# and the documentation under docs/ with mdBook. The Markdown files stay
+# the single source: they are copied into a generated book below target/
+# at build time.
 #
 #   python3 site/build.py [--tag vX.Y.Z] [--out target/site] [--mdbook mdbook]
 #
 # The documentation comes from a release tag, by default the latest v* tag,
-# and links that leave the book point to GitHub at that tag. Any other git
+# and links that leave the book point to GitHub at that tag. The landing
+# page and the build itself come from the working tree. Any other git
 # revision works too, like HEAD for a preview of unreleased documentation.
 #
 # Only the Python standard library is used.
@@ -91,13 +93,14 @@ class Revision:
             self.label = f"commit {self.commit[:12]}"
             self.url = f"{REPO}/tree/{self.commit}"
 
-    def version_line(self):
+    def version_text(self):
         link = f'<a href="{html.escape(self.url)}">{html.escape(self.label)}</a>'
         if self.is_tag:
-            text = f"Documentation for xmorpheo {link}"
-        else:
-            text = f"Documentation for xmorpheo at {link}, not a release"
-        return f'<p class="doc-version">{text}</p>'
+            return f"Documentation for xmorpheo {link}"
+        return f"Documentation for xmorpheo at {link}, not a release"
+
+    def version_line(self):
+        return f'<p class="doc-version">{self.version_text()}</p>'
 
     def extract(self, dest, paths):
         """Writes the given paths of the revision below dest."""
@@ -292,6 +295,25 @@ def build_book(revision, work, out, mdbook):
         fail("mdbook printed warnings")
 
 
+def build_landing(revision, out):
+    """Writes the landing page with its style and the logo."""
+    page = (SITE / "index.html.in").read_text(encoding="utf-8")
+    # Links to files at the documented revision must exist there.
+    for path in re.findall(rf"{re.escape(REPO)}/blob/@REF@/([^\"#]+)", page):
+        if revision.kind(path) != "blob":
+            fail(f"index.html.in: {path} does not exist in {revision.name}")
+    page = page.replace("@VERSION_LINE@", revision.version_text())
+    page = page.replace("@REF@", revision.ref)
+    left = re.findall(r"@[A-Z_]+@", page)
+    if left:
+        fail(f"index.html.in: unknown placeholders {', '.join(sorted(set(left)))}")
+    (out / "index.html").write_text(page, encoding="utf-8")
+    shutil.copy(SITE / "style.css", out / "style.css")
+    (out / "img").mkdir()
+    for logo in ("logo-light.png", "logo-dark.png"):
+        shutil.copy(ROOT / "docs/img" / logo, out / "img" / logo)
+
+
 class Anchors(html.parser.HTMLParser):
     """The ids and the links of an HTML page."""
 
@@ -355,6 +377,7 @@ def main():
             shutil.rmtree(path)
     out.mkdir(parents=True)
 
+    build_landing(revision, out)
     build_book(revision, work / "book", out, args.mdbook)
     check_links(out)
     print(f"built {out.relative_to(ROOT)} for {revision.label}")
