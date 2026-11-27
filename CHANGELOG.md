@@ -10,21 +10,24 @@ configuration format may still change.
 
 ## [Unreleased]
 
-### Changed
 
-- The Thrustmaster T300 RS example only applies with hid-tmff2 bound.
-  Under hid-generic, the wheel names its pedals differently, and the swap
-  hit brake and gas instead of brake and clutch.
-- When a driver binds to a device that the configuration names, but no
-  entry matches the device with that driver, the udev rule detaches a
-  program that is still attached, instead of keeping it.
+## [0.2.0] - 2026-11-27
 
 ### Added
 
-- `xmorpheo list` shows the HID driver bound to each device.
 - `driver` limits a device entry to one HID driver, for drivers that
   replace the report descriptor and so rename the axes. An entry with
   `driver` wins over one without. `xmorpheo template` shows the driver.
+- `xmorpheo list` shows the HID driver bound to each device.
+
+### Fixed
+
+- The Thrustmaster T300 RS example also applied under hid-generic, where
+  the wheel names its pedals differently, so it swapped brake and gas
+  instead of brake and clutch. It now only applies with hid-tmff2 bound.
+- When a driver bound to a device that the configuration names, but no
+  entry matched the device with that driver, the udev rule kept the
+  program that was still attached. It now detaches it.
 
 
 ## [0.1.2] - 2026-11-22
@@ -72,7 +75,8 @@ Initial release: response curves and axis remapping for HID joysticks,
 gamepads, and wheels with HID-BPF, tested with VKB Gladiator EVO sticks and
 an Xbox Series X|S controller under xpadneo.
 
-[Unreleased]: https://github.com/xpadneo/xmorpheo/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/xpadneo/xmorpheo/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/xpadneo/xmorpheo/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/xpadneo/xmorpheo/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/xpadneo/xmorpheo/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xpadneo/xmorpheo/releases/tag/v0.1.0
