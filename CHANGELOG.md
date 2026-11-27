@@ -10,6 +10,11 @@ configuration format may still change.
 
 ## [Unreleased]
 
+### Added
+
+- The website <https://xpadneo.github.io/xmorpheo/> with the documentation
+  of the latest release.
+
 
 ## [0.2.0] - 2026-11-27
 

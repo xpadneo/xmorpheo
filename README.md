@@ -133,6 +133,9 @@ See [DESIGN.md](docs/DESIGN.md) for details.
 
 ## Documentation
 
+The documentation of the latest release is also on the website,
+<https://xpadneo.github.io/xmorpheo/>.
+
 - [INSTALL.md](docs/INSTALL.md): building, installing, and uninstalling.
 - [CONFIG.md](docs/CONFIG.md): the configuration file.
 - [FORMULAS.md](docs/FORMULAS.md): the curve formulas, with expo curves.
