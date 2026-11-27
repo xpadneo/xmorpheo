@@ -48,6 +48,9 @@ documentation under `/docs/`, rendered with mdBook.
 - Show the logo through a `<picture>` element with a
   `prefers-color-scheme: dark` source, like `docs/AGENTS.md` requires.
 - English only.
+- The landing page has a title, a description, a canonical URL, and Open
+  Graph tags with the logo. The sitemap lists the landing page and the
+  pages of the book, without the copies and helper pages of mdBook.
 - Pin the exact mdBook version.
 
 

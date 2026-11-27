@@ -32,6 +32,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 TARGET = ROOT / "target"
 REPO = "https://github.com/xpadneo/xmorpheo"
+SITE_URL = "https://xpadneo.github.io/xmorpheo/"
+# Pages of mdBook that are not for search engines. docs/index.html is a
+# copy of the first chapter.
+NOT_IN_SITEMAP = {"docs/404.html", "docs/index.html", "docs/print.html", "docs/toc.html"}
 
 # The chapters of the book in this order, by their path in the repository.
 # Other docs/*.md files follow them, docs/descriptors/*.md come in their
@@ -304,6 +308,7 @@ def build_landing(revision, out):
             fail(f"index.html.in: {path} does not exist in {revision.name}")
     page = page.replace("@VERSION_LINE@", revision.version_text())
     page = page.replace("@REF@", revision.ref)
+    page = page.replace("@SITE_URL@", SITE_URL)
     left = re.findall(r"@[A-Z_]+@", page)
     if left:
         fail(f"index.html.in: unknown placeholders {', '.join(sorted(set(left)))}")
@@ -312,6 +317,26 @@ def build_landing(revision, out):
     (out / "img").mkdir()
     for logo in ("logo-light.png", "logo-dark.png"):
         shutil.copy(ROOT / "docs/img" / logo, out / "img" / logo)
+
+
+def build_sitemap(revision, out):
+    """Lists the landing page and the pages of the book, with the date of
+    the documented commit."""
+    date = git("show", "-s", "--format=%cs", revision.commit).strip()
+    paths = sorted(
+        p.relative_to(out).as_posix()
+        for p in out.rglob("*.html")
+        if p.relative_to(out).as_posix() not in NOT_IN_SITEMAP
+    )
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for path in paths:
+        url = SITE_URL + path.removesuffix("index.html")
+        lines.append(f"  <url><loc>{html.escape(url)}</loc><lastmod>{date}</lastmod></url>")
+    lines += ["</urlset>", ""]
+    (out / "sitemap.xml").write_text("\n".join(lines), encoding="utf-8")
 
 
 class Anchors(html.parser.HTMLParser):
@@ -379,6 +404,7 @@ def main():
 
     build_landing(revision, out)
     build_book(revision, work / "book", out, args.mdbook)
+    build_sitemap(revision, out)
     check_links(out)
     print(f"built {out.relative_to(ROOT)} for {revision.label}")
 
