@@ -13,6 +13,7 @@ rendered with mdBook.
 
 - `build.py` - the build, run by `make site`, writes `target/site`.
 - `book.toml` - the mdBook configuration.
+- `docs.css` - extra styles for the book.
 
 
 ## Local Contracts
@@ -23,7 +24,14 @@ rendered with mdBook.
 - The order of the chapters is `CHAPTERS` in `build.py`. Other
   `docs/*.md` files follow them, `docs/descriptors/*.md` get their own
   part. Guides for agents stay out of the book.
-- The build fails on mdBook warnings, and deletes only below `target/`.
+- The documentation comes from a git revision, by default the latest `v*`
+  tag, never from the working tree. Every page names it below its title,
+  with a link to the release.
+- Links within the book stay relative. Links to other files of the
+  repository, like `../examples/*.toml` or `README.md`, become GitHub URLs
+  at the documented revision. A link to a missing file fails the build.
+- The build fails on mdBook warnings and errors, and on links to missing
+  pages or anchors in the output. It deletes only below `target/`.
 - Pin the exact mdBook version.
 
 
@@ -34,7 +42,8 @@ rendered with mdBook.
 
 ## Verification
 
-- Run `make site` and check that it finishes without warnings.
+- Run `make site` and `make site TAG=HEAD`, and check that both finish
+  without warnings.
 
 
 ## Child DOX Index

@@ -5,20 +5,31 @@
 # mdBook. The Markdown files stay the single source: they are copied into
 # a generated book below target/ at build time.
 #
-#   python3 site/build.py [--out target/site] [--mdbook mdbook]
+#   python3 site/build.py [--tag vX.Y.Z] [--out target/site] [--mdbook mdbook]
+#
+# The documentation comes from a release tag, by default the latest v* tag,
+# and links that leave the book point to GitHub at that tag. Any other git
+# revision works too, like HEAD for a preview of unreleased documentation.
 #
 # Only the Python standard library is used.
 
 import argparse
+import html
+import html.parser
+import io
+import os
+import posixpath
 import re
 import shutil
 import subprocess
 import sys
+import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 TARGET = ROOT / "target"
+REPO = "https://github.com/xpadneo/xmorpheo"
 
 # The chapters of the book in this order, by their path in the repository.
 # Other docs/*.md files follow them, docs/descriptors/*.md come in their
@@ -43,6 +54,67 @@ def fail(message):
     sys.exit(1)
 
 
+def git(*args, binary=False):
+    result = subprocess.run(
+        ["git", "-C", str(ROOT), *args], capture_output=True, text=not binary
+    )
+    if result.returncode != 0:
+        stderr = result.stderr
+        if binary:
+            stderr = stderr.decode(errors="replace")
+        fail(f"git {' '.join(args)} failed: {stderr.strip()}")
+    return result.stdout
+
+
+class Revision:
+    """The documented revision: its name, the ref for GitHub links, and
+    the line every page shows."""
+
+    def __init__(self, name):
+        if name is None:
+            tags = git("tag", "--list", "v*", "--sort=-v:refname").split()
+            if not tags:
+                fail("no v* tag, give a revision with --tag")
+            name = tags[0]
+        self.name = name
+        self.commit = git("rev-parse", "--verify", f"{name}^{{commit}}").strip()
+        tag = subprocess.run(
+            ["git", "-C", str(ROOT), "rev-parse", "--verify", "-q", f"refs/tags/{name}"],
+            capture_output=True,
+        )
+        self.is_tag = tag.returncode == 0
+        self.ref = name if self.is_tag else self.commit
+        if self.is_tag:
+            self.label = name
+            self.url = f"{REPO}/releases/tag/{name}"
+        else:
+            self.label = f"commit {self.commit[:12]}"
+            self.url = f"{REPO}/tree/{self.commit}"
+
+    def version_line(self):
+        link = f'<a href="{html.escape(self.url)}">{html.escape(self.label)}</a>'
+        if self.is_tag:
+            text = f"Documentation for xmorpheo {link}"
+        else:
+            text = f"Documentation for xmorpheo at {link}, not a release"
+        return f'<p class="doc-version">{text}</p>'
+
+    def extract(self, dest, paths):
+        """Writes the given paths of the revision below dest."""
+        data = git("archive", "--format=tar", self.commit, *paths, binary=True)
+        with tarfile.open(fileobj=io.BytesIO(data)) as archive:
+            archive.extractall(dest, filter="data")
+
+    def kind(self, path):
+        """blob or tree for a path in the revision, None if it is missing."""
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "cat-file", "-t", f"{self.commit}:{path}"],
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip() if result.returncode == 0 else None
+
+
 def below_target(path):
     """Resolves path and makes sure it is below target/, so it is safe to
     delete."""
@@ -56,6 +128,96 @@ def book_path(repo_path):
     """The path of a repository file in the book: docs/ is the root of the
     book, the changelog sits next to it."""
     return repo_path.removeprefix("docs/")
+
+
+# Inline links and images, and reference definitions. Code is masked first.
+LINK = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)((?:\s+\"[^\"]*\")?)\)")
+REFERENCE = re.compile(r"^( {0,3}\[[^\]]+\]:[ \t]*)(\S+)", re.MULTILINE)
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+CODE_SPAN = re.compile(r"(`+)(?:(?!\1).)+?\1")
+
+
+def split_code(text):
+    """Splits text into (is_code, part) pairs: fenced code blocks and code
+    spans are code."""
+    parts = []
+    prose = []
+    fence = None
+    for line in text.splitlines(keepends=True):
+        match = FENCE.match(line)
+        if fence is None and match:
+            fence = match.group(1)
+            parts.append((False, "".join(prose)))
+            prose = []
+            parts.append((True, line))
+        elif fence is not None:
+            parts.append((True, line))
+            if match and match.group(1)[0] == fence[0] and len(match.group(1)) >= len(fence):
+                fence = None
+        else:
+            prose.append(line)
+    parts.append((False, "".join(prose)))
+    result = []
+    for is_code, part in parts:
+        if is_code:
+            result.append((True, part))
+            continue
+        last = 0
+        for match in CODE_SPAN.finditer(part):
+            result.append((False, part[last : match.start()]))
+            result.append((True, match.group(0)))
+            last = match.end()
+        result.append((False, part[last:]))
+    return result
+
+
+def rewrite_url(url, repo_path, pages, revision, image=False):
+    """The URL of a link in repo_path, for the book: links within the book
+    stay relative, links to other files of the repository go to GitHub at
+    the documented revision."""
+    if re.match(r"[A-Za-z][A-Za-z0-9+.-]*:", url) or url.startswith(("#", "/")):
+        return url
+    path, hash_, fragment = url.partition("#")
+    target = posixpath.normpath(posixpath.join(posixpath.dirname(repo_path), path))
+    if target.startswith("../"):
+        fail(f"{repo_path}: {url} leaves the repository")
+    if target in pages:
+        here = posixpath.dirname(book_path(repo_path)) or "."
+        return posixpath.relpath(book_path(target), here) + hash_ + fragment
+    kind = revision.kind(target)
+    if kind is None:
+        fail(f"{repo_path}: {url} does not exist in {revision.name}")
+    if image and kind == "blob":
+        return f"{REPO}/raw/{revision.ref}/{target}"
+    return f"{REPO}/{kind}/{revision.ref}/{target}{hash_}{fragment}"
+
+
+def rewrite_links(text, repo_path, pages, revision):
+    def inline(match):
+        image, label, url, link_title = match.groups()
+        url = rewrite_url(url, repo_path, pages, revision, image=bool(image))
+        return f"{image}[{label}]({url}{link_title})"
+
+    def reference(match):
+        return match.group(1) + rewrite_url(match.group(2), repo_path, pages, revision)
+
+    parts = []
+    for is_code, part in split_code(text):
+        if not is_code:
+            part = REFERENCE.sub(reference, LINK.sub(inline, part))
+        parts.append(part)
+    return "".join(parts)
+
+
+def add_version_line(text, revision):
+    """Puts the version line below the title of a page."""
+    return re.sub(
+        r"^# .+$",
+        lambda match: f"{match.group(0)}\n\n{revision.version_line()}",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
 
 
 def title(text, repo_path):
@@ -96,23 +258,30 @@ def summary(content, chapters, descriptors):
     return "\n".join(lines)
 
 
-def build_book(content, work, out, mdbook):
+def build_book(revision, work, out, mdbook):
+    content = work / "content"
+    revision.extract(content, ["docs", CHANGELOG])
     chapters, descriptors = collect(content)
+    pages = set(chapters + descriptors + [CHANGELOG])
     src = work / "src"
     src.mkdir(parents=True)
     for path in chapters + descriptors + [CHANGELOG]:
         dest = src / book_path(path)
         dest.parent.mkdir(parents=True, exist_ok=True)
         text = (content / path).read_text(encoding="utf-8")
+        text = add_version_line(rewrite_links(text, path, pages, revision), revision)
         dest.write_text(text, encoding="utf-8")
     (src / "SUMMARY.md").write_text(
         summary(content, chapters, descriptors), encoding="utf-8"
     )
     shutil.copy(SITE / "book.toml", work / "book.toml")
+    shutil.copy(SITE / "docs.css", work / "docs.css")
+    env = dict(os.environ, MDBOOK_BOOK__TITLE=f"xmorpheo {revision.label}")
     result = subprocess.run(
         [mdbook, "build", "--dest-dir", str(out / "docs"), str(work)],
         capture_output=True,
         text=True,
+        env=env,
     )
     sys.stderr.write(result.stderr)
     if result.returncode != 0:
@@ -123,12 +292,62 @@ def build_book(content, work, out, mdbook):
         fail("mdbook printed warnings")
 
 
+class Anchors(html.parser.HTMLParser):
+    """The ids and the links of an HTML page."""
+
+    def __init__(self):
+        super().__init__()
+        self.ids = set()
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if "id" in attrs:
+            self.ids.add(attrs["id"])
+        for name in ("href", "src"):
+            if attrs.get(name):
+                self.links.append(attrs[name])
+
+
+def check_links(out):
+    """Fails on links within the site that point to a missing file or
+    anchor, and on links to Markdown files."""
+    pages = {}
+    for page in out.rglob("*.html"):
+        parser = Anchors()
+        parser.feed(page.read_text(encoding="utf-8"))
+        pages[page] = parser
+    broken = []
+    for page, parser in pages.items():
+        for link in parser.links:
+            if re.match(r"[A-Za-z][A-Za-z0-9+.-]*:", link) or link.startswith("//"):
+                continue
+            path, _, fragment = link.partition("#")
+            path = path.partition("?")[0]
+            if link.startswith("/"):
+                continue  # site-url links of the 404 page
+            target = (page.parent / path).resolve() if path else page
+            if target.is_dir():
+                target = target / "index.html"
+            if path.endswith(".md") or not target.exists():
+                broken.append(f"{page.relative_to(out)}: {link}")
+            elif fragment and target.suffix == ".html":
+                if fragment not in pages[target].ids:
+                    broken.append(f"{page.relative_to(out)}: {link}")
+    if broken:
+        fail("broken links:\n  " + "\n  ".join(sorted(set(broken))))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Builds the website.")
+    parser.add_argument(
+        "--tag", help="the documented git revision, default the latest v* tag"
+    )
     parser.add_argument("--out", default="target/site", help="output directory")
     parser.add_argument("--mdbook", default="mdbook", help="the mdbook command")
     args = parser.parse_args()
 
+    revision = Revision(args.tag)
     out = below_target(ROOT / args.out)
     work = below_target(TARGET / "site-build")
     for path in (out, work):
@@ -136,8 +355,9 @@ def main():
             shutil.rmtree(path)
     out.mkdir(parents=True)
 
-    build_book(ROOT, work / "book", out, args.mdbook)
-    print(f"built {out.relative_to(ROOT)}")
+    build_book(revision, work / "book", out, args.mdbook)
+    check_links(out)
+    print(f"built {out.relative_to(ROOT)} for {revision.label}")
 
 
 if __name__ == "__main__":

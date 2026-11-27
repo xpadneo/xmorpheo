@@ -1,0 +1,8 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+
+/* The line below the title of every page that names the documented
+ * version. */
+.doc-version {
+    font-size: 0.9em;
+    opacity: 0.8;
+}

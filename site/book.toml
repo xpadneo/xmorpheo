@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # mdBook configuration of the documentation under /docs/ of the website.
-# build.py copies this file next to the generated book sources, and sets
-# the title to the documented version.
+# build.py copies this file and docs.css next to the generated book
+# sources, and sets the title to the documented version.
 
 [book]
 title = "xmorpheo"
@@ -17,3 +17,4 @@ create-missing = false
 site-url = "/xmorpheo/docs/"
 git-repository-url = "https://github.com/xpadneo/xmorpheo"
 no-section-label = true
+additional-css = ["docs.css"]

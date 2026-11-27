@@ -12,8 +12,8 @@
 # /etc/xmorpheo/conf.d. "make uninstall" removes everything "make install"
 # created, and keeps the drop-in directories while they have files.
 #
-# "make site" builds the website into target/site, it needs python3 and
-# mdbook, see site/AGENTS.md.
+# "make site" builds the website into target/site for the latest release
+# tag, or for TAG=vX.Y.Z, it needs python3 and mdbook, see site/AGENTS.md.
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -152,4 +152,4 @@ install-check-package:
 # "python3 -m http.server -d target/site".
 site:
 	$(no_root)
-	$(PYTHON) site/build.py --out $(SITEDIR) --mdbook $(MDBOOK)
+	$(PYTHON) site/build.py --out $(SITEDIR) --mdbook $(MDBOOK) $(if $(TAG),--tag $(TAG))

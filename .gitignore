@@ -4,6 +4,7 @@
 /.zed
 /compile_commands.json
 /target/
+__pycache__/
 *.bpf.o
 *.skel.h
 vmlinux.h
