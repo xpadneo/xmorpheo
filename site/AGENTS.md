@@ -40,6 +40,9 @@ documentation under `/docs/`, rendered with mdBook.
 - The landing page states only what `README.md`, `docs/RECIPES.md`, and
   the examples state, and changes with them. Each use case links to its
   recipe or example.
+- The roadmap names only ideas from `docs/IDEAS.md` and work in progress,
+  without dates, promises, or configuration syntax of unreleased features,
+  and links `docs/IDEAS.md` on `main`.
 - Keep the landing page device- and game-agnostic: xmorpheo works with any
   HID device and any game, because it changes the reports in the kernel.
   Name devices and games only as tested examples.

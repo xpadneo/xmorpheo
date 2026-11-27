@@ -282,6 +282,10 @@ main > section:not(.hero) {
     padding: 1rem 1.25rem;
 }
 
+.roadmap li {
+    margin-bottom: 0.4rem;
+}
+
 .caution h2 {
     color: var(--caution);
 }

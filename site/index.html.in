@@ -190,6 +190,25 @@ sudo xmorpheo attach --all</code></pre>
   </p>
 </section>
 
+<section class="roadmap" aria-labelledby="roadmap-title">
+  <h2 id="roadmap-title">Roadmap</h2>
+  <p>
+    What comes next, without dates and without promises. The
+    <a href="https://github.com/xpadneo/xmorpheo/blob/main/docs/IDEAS.md">list of ideas</a>
+    has the details.
+  </p>
+  <ul>
+    <li>Remapping buttons, hat switches, and D-pads is in development.</li>
+    <li>Shift layers: a button that switches, or toggles, between mappings
+      of the buttons and axes.</li>
+    <li>Switching between curve sets at runtime, like a precision curve
+      for aiming on a button press.</li>
+    <li>Inverting force feedback together with an inverted steering
+      axis, if the device protocol allows it.</li>
+    <li>A graphical user interface that previews a curve on live input.</li>
+  </ul>
+</section>
+
 <section class="caution" aria-labelledby="caution-title">
   <h2 id="caution-title">Force feedback devices</h2>
   <p>
