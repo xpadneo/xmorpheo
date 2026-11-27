@@ -138,12 +138,203 @@
       <dd>Hold an axis still, like a twist that should not yaw.</dd>
     </div>
   </dl>
+</section>
+
+<section class="compare" aria-labelledby="compare-title">
+  <h2 id="compare-title">Compared to other tools</h2>
   <p>
-    If you know curve tools like Joystick Gremlin from Windows: xmorpheo
-    covers the axes on Linux, with curves and deadzones per axis, in a
-    plain configuration file. Buttons, layers, and macros are
-    <a href="docs/IDEAS.html">not done yet</a>.
+    Several tools change what games get from an input device. They work on
+    different layers, so they often complement each other. The table shows
+    what their own documentation says, as of November 2026.
+    <a href="https://github.com/xpadneo/xmorpheo/issues">Corrections are
+    welcome</a>.
   </p>
+  <div class="table-wrap" role="region" aria-labelledby="compare-title" tabindex="0">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Tool</th>
+          <th scope="col">Platform</th>
+          <th scope="col">Games see the real device and its IDs</th>
+          <th scope="col">Reaches <code>hidraw</code> readers, like Proton</th>
+          <th scope="col">Response curves</th>
+          <th scope="col">Deadzones</th>
+          <th scope="col">Swap or combine axes</th>
+          <th scope="col">Buttons</th>
+          <th scope="col">Layers or macros</th>
+          <th scope="col">GUI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">xmorpheo</th>
+          <td>Linux 6.11+</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="planned"><a href="#roadmap-title">planned</a></td>
+          <td class="planned"><a href="#roadmap-title">layers planned</a></td>
+          <td class="planned"><a href="#roadmap-title">planned</a></td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://whitemagic.github.io/JoystickGremlin/">Joystick Gremlin</a></th>
+          <td>Windows</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://partner.steamgames.com/doc/features/steam_controller">Steam Input</a></th>
+          <td>Linux, Windows, macOS</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="na">unclear</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://github.com/sezanzeb/input-remapper">input-remapper</a></th>
+          <td>Linux</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="partly">gain, expo</td>
+          <td class="yes">yes</td>
+          <td class="partly">swap</td>
+          <td class="yes">yes</td>
+          <td class="partly">macros</td>
+          <td class="yes">yes</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://github.com/KarsMulder/evsieve">evsieve</a></th>
+          <td>Linux</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="partly">linear</td>
+          <td class="na">unclear</td>
+          <td class="partly">swap</td>
+          <td class="yes">yes</td>
+          <td class="partly">toggles</td>
+          <td class="no">no</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://sourceforge.net/projects/linuxconsole/">jscal, evdev-joystick</a></th>
+          <td>Linux</td>
+          <td class="yes">yes</td>
+          <td class="no">no</td>
+          <td class="partly">piecewise linear</td>
+          <td class="partly">evdev hint</td>
+          <td class="partly">joydev only</td>
+          <td class="partly">joydev only</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://github.com/AntiMicroX/antimicrox">AntiMicroX</a></th>
+          <td>Linux, Windows</td>
+          <td class="na">n/a</td>
+          <td class="na">n/a</td>
+          <td class="partly">mouse output</td>
+          <td class="yes">yes</td>
+          <td class="no">no</td>
+          <td class="partly">to keys, mouse</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://libevdev.pages.freedesktop.org/udev-hid-bpf/">udev-hid-bpf</a></th>
+          <td>Linux</td>
+          <td class="yes">yes</td>
+          <td class="yes">yes</td>
+          <td class="partly">own BPF code</td>
+          <td class="partly">own BPF code</td>
+          <td class="partly">own BPF code</td>
+          <td class="partly">own BPF code</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+        </tr>
+        <tr>
+          <th scope="row"><a href="https://github.com/berarma/oversteer">Oversteer</a></th>
+          <td>Linux</td>
+          <td class="yes">yes</td>
+          <td class="partly">some drivers</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="partly">pedals</td>
+          <td class="no">no</td>
+          <td class="no">no</td>
+          <td class="yes">yes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="legend">
+    <span class="planned">Planned</span> means on the
+    <a href="#roadmap-title">roadmap</a>, not in a release yet.
+  </p>
+  <dl class="tools">
+    <div>
+      <dt>xmorpheo</dt>
+      <dd>Rewrites the axes in the kernel, so every reader of the device
+        gets the new values, from a configuration file with formulas.
+        Attaching needs root, there are no buttons, layers, or GUI yet, see
+        the <a href="#roadmap-title">roadmap</a>.</dd>
+    </div>
+    <div>
+      <dt>Joystick Gremlin</dt>
+      <dd>Maps physical devices to vJoy virtual joysticks, keyboard, and
+        mouse on Windows, with curves, modes, macros, and Python scripts.
+        Games bind to the virtual device, and HidHide can hide the real
+        one.</dd>
+    </div>
+    <div>
+      <dt>Steam Input</dt>
+      <dd>Remaps controllers per game in the Steam client, with action
+        sets, layers, and mode shifts, and presents an emulated controller
+        to the game.</dd>
+    </div>
+    <div>
+      <dt>input-remapper</dt>
+      <dd>Maps any input to keys, mouse, axes, or macros through virtual
+        uinput devices, with a GUI and a system service.</dd>
+    </div>
+    <div>
+      <dt>evsieve</dt>
+      <dd>Transforms evdev events on the command line and writes them to
+        virtual uinput devices, for scripted setups.</dd>
+    </div>
+    <div>
+      <dt>jscal, evdev-joystick</dt>
+      <dd>Calibrate the real device in the kernel: jscal the joydev
+        interface, evdev-joystick the range, deadzone, and fuzz of the
+        evdev axes.</dd>
+    </div>
+    <div>
+      <dt>AntiMicroX</dt>
+      <dd>Maps gamepad input to keyboard and mouse, for games and
+        applications without controller support.</dd>
+    </div>
+    <div>
+      <dt>udev-hid-bpf</dt>
+      <dd>Loads HID-BPF programs on udev events, mostly fixes for specific
+        devices. It uses the same kernel mechanism as xmorpheo, but each
+        change is a BPF program written in C.</dd>
+    </div>
+    <div>
+      <dt>Oversteer</dt>
+      <dd>Sets the options that the drivers of steering wheels offer, like
+        the rotation range and combined pedals, with a GUI.</dd>
+    </div>
+  </dl>
 </section>
 
 <section class="tested" aria-labelledby="tested-title">

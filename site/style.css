@@ -282,6 +282,92 @@ main > section:not(.hero) {
     padding: 1rem 1.25rem;
 }
 
+/* The comparison: only the table scrolls on narrow screens, with the
+ * names of the tools kept in view. */
+
+.table-wrap {
+    margin: 0 0 2rem;
+    overflow-x: auto;
+}
+
+.compare table {
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 56rem;
+    width: 100%;
+}
+
+.compare th,
+.compare td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.5rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.compare thead th {
+    color: var(--muted);
+    font-weight: 600;
+    vertical-align: bottom;
+}
+
+.compare thead th:first-child,
+.compare tbody th {
+    background: var(--paper);
+    font-weight: 700;
+    left: 0;
+    position: sticky;
+    white-space: nowrap;
+}
+
+.compare tbody tr:first-child th,
+.compare tbody tr:first-child td {
+    background: var(--panel);
+}
+
+.compare .yes {
+    color: var(--accent);
+    font-weight: 650;
+}
+
+.compare .no,
+.compare .na {
+    color: var(--muted);
+}
+
+.compare .planned {
+    font-style: italic;
+    font-weight: 650;
+}
+
+.compare td.planned a {
+    color: var(--ink);
+    text-decoration-color: var(--curve);
+    text-decoration-style: dashed;
+}
+
+.compare .legend {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: -1.25rem 0 2rem;
+}
+
+.tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1.25rem 2.5rem;
+    margin: 0;
+}
+
+.tools dt {
+    font-weight: 700;
+}
+
+.tools dd {
+    color: var(--muted);
+    margin: 0;
+}
+
 .roadmap li {
     margin-bottom: 0.4rem;
 }

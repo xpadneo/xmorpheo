@@ -40,6 +40,10 @@ documentation under `/docs/`, rendered with mdBook.
 - The landing page states only what `README.md`, `docs/RECIPES.md`, and
   the examples state, and changes with them. Each use case links to its
   recipe or example.
+- The comparison with other tools states only what their own
+  documentation or source says, with the month it was checked, in a
+  neutral tone, and links each tool. Mark a cell unclear instead of
+  guessing, and keep the row of xmorpheo as honest as the others.
 - The roadmap names only ideas from `docs/IDEAS.md` and work in progress,
   without dates, promises, or configuration syntax of unreleased features,
   and links `docs/IDEAS.md` on `main`.
