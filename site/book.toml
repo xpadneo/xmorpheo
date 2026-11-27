@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# mdBook configuration of the documentation under /docs/ of the website.
+# build.py copies this file next to the generated book sources, and sets
+# the title to the documented version.
+
+[book]
+title = "xmorpheo"
+description = "Response curves, deadzones, and axis remapping for Linux joysticks, gamepads, and wheels with HID-BPF."
+language = "en"
+src = "src"
+
+[build]
+create-missing = false
+
+[output.html]
+site-url = "/xmorpheo/docs/"
+git-repository-url = "https://github.com/xpadneo/xmorpheo"
+no-section-label = true

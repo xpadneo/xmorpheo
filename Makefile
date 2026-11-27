@@ -11,6 +11,9 @@
 # configuration is active after installing: copy or link an example into
 # /etc/xmorpheo/conf.d. "make uninstall" removes everything "make install"
 # created, and keeps the drop-in directories while they have files.
+#
+# "make site" builds the website into target/site, it needs python3 and
+# mdbook, see site/AGENTS.md.
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -41,8 +44,11 @@ CONFD := $(SYSCONFDIR)/xmorpheo/conf.d
 INSTALL_CONFD := $(if $(filter yes,$(INSTALL_SYSCONFDIR)),$(CONFD))
 EXAMPLES := $(wildcard examples/*.toml)
 CHECKDIR ?= target/install-check
+PYTHON ?= python3
+MDBOOK ?= mdbook
+SITEDIR ?= target/site
 
-.PHONY: all build generate check-build install uninstall install-check install-check-package FORCE
+.PHONY: all build generate check-build install uninstall install-check install-check-package site FORCE
 
 define no_root
 	@if [ "$(BUILD_UID)" = 0 ] && [ -z "$(ALLOW_ROOT_BUILD)" ]; then \
@@ -141,3 +147,9 @@ install-check-package:
 	test -f target/install-check-package/usr/lib/udev/rules.d/60-xmorpheo.rules
 	$(MAKE) --no-print-directory install-check $(PACKAGE_VARS)
 	@echo "install-check-package: ok"
+
+# The website, see site/AGENTS.md. Preview it with
+# "python3 -m http.server -d target/site".
+site:
+	$(no_root)
+	$(PYTHON) site/build.py --out $(SITEDIR) --mdbook $(MDBOOK)

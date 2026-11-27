@@ -172,6 +172,7 @@ relevant child guide.
 - `docs/` - user-facing documentation, the design document, the list of
   ideas, and images.
 - `examples/` - example configurations and curve profiles under CC0-1.0.
+- `site/` - the build of the project website.
 - `xmorpheo/` - the Rust crate with the library and the `xmorpheo` command
   line tool.
 
