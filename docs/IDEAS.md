@@ -69,3 +69,9 @@ Ideas for later. They are not planned for a release yet. Move an idea into
 - A graphical user interface, for example built with GPUI, that shows a
   realistic preview of the device based on its vendor and product ID, and
   previews the curve on live input.
+
+
+## Website
+
+- The rustdoc API documentation of the crate for contributors, under
+  `/api/` of the project website.
